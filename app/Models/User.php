@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Factories\HasFactory; // ✅ Dòng quan trọng
+use Illuminate\Database\Eloquent\Factories\HasFactory; 
 
 class User extends Authenticatable
 {
@@ -25,17 +25,15 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // ✅ Accessor: $user->name
     public function getNameAttribute()
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    // ✅ Mutator: tự mã hóa password nếu dùng create()
     public function setPasswordAttribute($value)
     {
         if ($value) {
-            $this->attributes['password'] = bcrypt($value);
+            $this->attributes['password'] = bcrypt($value);   // Mã hóa mật khẩu trước khi lưu này bỏ đi
         }
     }
 }

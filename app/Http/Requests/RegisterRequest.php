@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
@@ -14,18 +15,16 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'required|string|max:30',
+            'first_name' => 'required|string|max:30', //required thêm *
             'last_name'  => 'required|string|max:30',
-            'email'      => 'required|email:rfc,dns|max:100|unique:users,email',
+            'email'      => 'required|email:rfc,dns|max:100|unique:users,email',//email từ >= 3 rules tro len phai dung mang k dc dung chuoi
             'password'   => [
                 'required',
-                'string',
-                'min:8',
                 'confirmed',
-                'regex:/[A-Z]/',           // Có chữ hoa
-                'regex:/[a-z]/',           // Có chữ thường
-                'regex:/[0-9]/',           // Có số
-                'regex:/[@$!%*#?&]/',      // Có ký tự đặc biệt
+                Password::min(8)
+                    ->mixedCase()    // Chữ hoa + thường
+                    ->numbers()      // Có số
+                    ->symbols(),     // Có ký tự đặc biệt
             ],
         ];
     }
@@ -45,9 +44,11 @@ class RegisterRequest extends FormRequest
             'email.unique'        => 'Email đã tồn tại.',
 
             'password.required'   => 'Vui lòng nhập mật khẩu.',
-            'password.min'        => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'password.confirmed'  => 'Xác nhận mật khẩu không khớp.',
-            'password.regex'      => 'Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt.',
+            'password.min'        => 'Mật khẩu phải có ít nhất :min ký tự.',
+            'password.mixed'      => 'Mật khẩu phải chứa chữ hoa và chữ thường.',
+            'password.numbers'    => 'Mật khẩu phải chứa ít nhất một số.',
+            'password.symbols'    => 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt.',
         ];
     }
 }

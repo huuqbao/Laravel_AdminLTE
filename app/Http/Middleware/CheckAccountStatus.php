@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Enums\UserStatus;
 
 class CheckAccountStatus
 {
@@ -15,18 +16,17 @@ class CheckAccountStatus
             return redirect()->route('login');
         }
 
-        if ($user->status === 0) {
-            return redirect()->route('login')->withErrors(['email' => 'Tài khoản đang chờ phê duyệt']);
-        }
+        return match ($user->status) {
+            UserStatus::Pending->value  => $this->deny('Tài khoản đang chờ phê duyệt'),
+            UserStatus::Rejected->value => $this->deny('Tài khoản bị từ chối'),
+            UserStatus::Locked->value   => $this->deny('Tài khoản đã bị khóa'),
+            default => $next($request),
+        };
+    }
 
-        if ($user->status === 2) {
-            return redirect()->route('login')->withErrors(['email' => 'Tài khoản bị từ chối']);
-        }
-
-        if ($user->status === 3) {
-            return redirect()->route('login')->withErrors(['email' => 'Tài khoản đã bị khóa']);
-        }
-
-        return $next($request);
+    protected function deny(string $message)
+    {
+        Auth::logout(); 
+        return redirect()->route('login')->withErrors(['email' => $message]);
     }
 }

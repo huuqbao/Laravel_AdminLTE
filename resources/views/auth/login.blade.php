@@ -1,11 +1,48 @@
-<form method="POST" action="{{ route('login') }}">
-    @csrf
-    <input name="email" value="{{ old('email') }}" placeholder="Email">
-    @error('email') <span>{{ $message }}</span> @enderror
+@extends('layouts.app')
 
-    <input name="password" type="password" placeholder="Password">
-    @error('password') <span>{{ $message }}</span> @enderror
+@section('title', 'Đăng nhập')
 
-    <button type="submit">Đăng nhập</button>
-</form>
-@if (session('success')) <div>{{ session('success') }}</div> @endif
+@section('content')
+<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <form method="POST" action="{{ route('login') }}" class="card shadow p-4 bg-white" style="min-width: 400px; max-width: 500px;">
+        @csrf
+
+        <h3 class="text-center text-primary mb-4">Đăng nhập</h3>
+
+        {{-- Hiển thị thông báo thành công --}}
+        @if (session('success'))
+            <div class="alert alert-success text-center">{{ session('success') }}</div>
+        @endif
+
+        {{-- Email --}}
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input name="email" type="email" id="email"
+                   class="form-control @error('email') is-invalid @enderror"
+                   value="{{ old('email') }}" placeholder="Nhập email" required autofocus>
+            @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        {{-- Mật khẩu --}}
+        <div class="mb-3">
+            <label for="password" class="form-label">Mật khẩu:</label>
+            <input name="password" type="password" id="password"
+                   class="form-control @error('password') is-invalid @enderror"
+                   placeholder="Nhập mật khẩu" required>
+            @error('password')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        {{-- Nút đăng nhập --}}
+        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+
+        {{-- Đăng ký --}}
+        <div class="text-center mt-3">
+            <a href="{{ route('register.form') }}">Chưa có tài khoản? Đăng ký ngay</a>
+        </div>
+    </form>
+</div>
+@endsection
