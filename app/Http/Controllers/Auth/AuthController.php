@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use App\Enums\UserStatus;
@@ -12,7 +12,8 @@ use App\Mail\WelcomeMail;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use App\Services\AuthService;
-
+use App\Enums\RoleStatus;
+use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
@@ -25,10 +26,6 @@ class AuthController extends Controller
 
     public function showRegister()
     {
-        if (Auth::check()) {
-            return redirect()->route('posts.index');// thanh to router
-        }
-
         return view('auth.register');
     }
 
@@ -40,37 +37,32 @@ class AuthController extends Controller
             'first_name' => $validated['first_name'],
             'last_name'  => $validated['last_name'],
             'email'      => $validated['email'],
-            'password'   => $validated['password'],     // 'password'   => Hash::make($validated['password']),
-            'status'     => UserStatus::Pending->value,
-            'role'       => 'user',
+            'password'   => Hash::make($validated['password']),
+            'status'     => UserStatus::PENDING->value,
+            'role'       => RoleStatus::USER->value,
         ]);
-        
-        Auth::login($user); 
 
-        Mail::to($user->email)->send(new WelcomeMail($user)); //job + queue
+        Auth::login($user);
 
-        return redirect()->route('login.form')->with('success', 'Đăng ký tài khoản thành công');
+        Mail::to($user->email)->send(new WelcomeMail($user)); // Job + Queue
+
+        return to_route('login.form')->with('success', 'Đăng ký tài khoản thành công');
     }
 
     public function showLogin()
     {
-        if (Auth::check()) {
-            return redirect()->route('posts.index');
-        }
-                
         return view('auth.login');
     }
 
     public function login(LoginRequest $request)
     {
-        if($this->authService->login($request->validated())) {
-            return redirect()->route('posts.index')->with('success', 'Đăng nhập thành công');
+        if ($this->authService->login($request->validated())) {
+            return to_route('posts.index')->with('success', 'Đăng nhập thành công');
         }
 
-        return redirect()->route('login.form')->withErrors([
+        return to_route('login.form')->withErrors([
             'email' => 'Email hoặc mật khẩu không đúng.',
         ]);
-
     }
 
     public function logout(Request $request)
@@ -79,6 +71,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login.form');
+        return to_route('login.form');
     }
 }

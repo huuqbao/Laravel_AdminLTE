@@ -3,41 +3,37 @@
 namespace App\Services;
 
 use App\Enums\UserStatus;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Auth\Events\Lockout;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
 
 class AuthService
 {
-    public function login(array $request): bool
+    public function login(array $credentials): bool
     {
-        if (Auth::attempt([
-            'email' => $request['email'],
-            'password' => $request['password'],
-        ])) {
-            $user = Auth::user(); // attempt check status
-            
-            match ($user->status) {
-                UserStatus::Pending->value  => $this->failLogin('Tài khoản đang chờ phê duyệt.'),
-                UserStatus::Rejected->value => $this->failLogin('Tài khoản đã bị từ chối.'),
-                UserStatus::Locked->value   => $this->failLogin('Tài khoản đã bị khóa.'),
-                default => true,
-            };
+        $user = User::where('email', $credentials['email'])->first();
 
-            return true;
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            return false; // Sai email hoặc mật khẩu
         }
 
-        return false;
+        // Check status trước khi login
+        match ($user->status) {
+            UserStatus::PENDING->value  => $this->failLogin('Tài khoản đang chờ phê duyệt.'),
+            UserStatus::REJECTED->value => $this->failLogin('Tài khoản đã bị từ chối.'),
+            UserStatus::LOCKED->value   => $this->failLogin('Tài khoản đã bị khóa.'),
+            default => null,
+        };
 
+        Auth::login($user); // Chỉ login nếu status hợp lệ
+
+        return true;
     }
-
 
     protected function failLogin(string $message): never
     {
-        Auth::logout();
+        Auth::logout(); // Đăng xuất ngay lập tức nếu status không hợp lệ
         throw ValidationException::withMessages(['email' => $message]);
     }
 }

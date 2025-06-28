@@ -18,6 +18,11 @@
                     <a href="#" class="list-group-item list-group-item-action">
                         👤 Thông tin cá nhân
                     </a>
+
+                    <a href="{{ route('profile.edit') }}" class="list-group-item list-group-item-action">
+                        👤 Cập nhật hồ sơ
+                    </a>
+                    
                     <a href="#" class="list-group-item list-group-item-action">
                         ⚙️ Cài đặt
                     </a>

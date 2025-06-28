@@ -16,10 +16,10 @@
 
         {{-- Email --}}
         <div class="mb-3">
-            <label for="email" class="form-label">Email:</label>
+            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
             <input name="email" type="email" id="email"
-                   class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="Nhập email" required autofocus>
+                class="form-control @error('email') is-invalid @enderror"
+                value="{{ old('email') }}" placeholder="Nhập email" required autofocus>
             @error('email')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -27,17 +27,23 @@
 
         {{-- Mật khẩu --}}
         <div class="mb-3">
-            <label for="password" class="form-label">Mật khẩu:</label>
+            <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
             <input name="password" type="password" id="password"
-                   class="form-control @error('password') is-invalid @enderror"
-                   placeholder="Nhập mật khẩu" required>
+                class="form-control @error('password') is-invalid @enderror"
+                placeholder="Nhập mật khẩu" required>
             @error('password')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
+
         {{-- Nút đăng nhập --}}
         <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+
+        {{-- Quên mật khẩu --}}
+        <div class="text-center mt-2">
+            <a href="{{ route('password.request') }}">Quên mật khẩu?</a>
+        </div>
 
         {{-- Đăng ký --}}
         <div class="text-center mt-3">

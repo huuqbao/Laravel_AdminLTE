@@ -17,7 +17,12 @@ class RegisterRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:30', //required thêm *
             'last_name'  => 'required|string|max:30',
-            'email'      => 'required|email:rfc,dns|max:100|unique:users,email',//email từ >= 3 rules tro len phai dung mang k dc dung chuoi
+            'email' => [
+                'required',
+                'email:rfc,dns',
+                'max:100',
+                'unique:users,email',
+            ],
             'password'   => [
                 'required',
                 'confirmed',

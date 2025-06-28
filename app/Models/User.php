@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory; 
+use App\Enums\RoleStatus;
 
 class User extends Authenticatable
 {
@@ -27,13 +28,18 @@ class User extends Authenticatable
 
     public function getNameAttribute()
     {
-        return "{$this->first_name} {$this->last_name}";
+        return $this->first_name . ' ' . $this->last_name;
     }
 
-    public function setPasswordAttribute($value)
+    public function getRoleEnumAttribute(): RoleStatus
     {
-        if ($value) {
-            $this->attributes['password'] = bcrypt($value);   // Mã hóa mật khẩu trước khi lưu này bỏ đi
-        }
+        return RoleStatus::from($this->role);
     }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+
 }

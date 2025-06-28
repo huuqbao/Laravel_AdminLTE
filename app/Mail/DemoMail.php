@@ -39,7 +39,7 @@ class DemoMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.demo',  // Tên view bạn sẽ tạo ở bước sau
+            view: 'emails.demo',  
             with: [
                 'name' => $this->name,
             ],
@@ -49,7 +49,7 @@ class DemoMail extends Mailable implements ShouldQueue
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, 
      */
     public function attachments(): array
     {
