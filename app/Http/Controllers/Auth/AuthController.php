@@ -42,9 +42,9 @@ class AuthController extends Controller
             'role'       => RoleStatus::USER->value,
         ]);
 
-        Auth::login($user);
+       // Auth::login($user);
 
-        Mail::to($user->email)->send(new WelcomeMail($user)); // Job + Queue
+        Mail::to($user->email)->send(new WelcomeMail($user)); // Bo sung: Su dung thong qua Job + Queue
 
         return to_route('login.form')->with('success', 'Đăng ký tài khoản thành công');
     }
