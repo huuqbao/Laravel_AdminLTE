@@ -14,6 +14,8 @@ use App\Http\Requests\LoginRequest;
 use App\Services\AuthService;
 use App\Enums\RoleStatus;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\QueryException;
+use Exception;
 
 class AuthController extends Controller
 {
@@ -31,22 +33,29 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $user = User::create([
-            'first_name' => $validated['first_name'],
-            'last_name'  => $validated['last_name'],
-            'email'      => $validated['email'],
-            'password'   => Hash::make($validated['password']),
-            'status'     => UserStatus::PENDING->value,
-            'role'       => RoleStatus::USER->value,
-        ]);
+            $user = User::create([
+                'first_name' => $validated['first_name'],
+                'last_name'  => $validated['last_name'],
+                'email'      => $validated['email'],
+                'password'   => Hash::make($validated['password']),
+                'status'     => UserStatus::PENDING->value,
+                'role'       => RoleStatus::USER->value,
+            ]);
 
-       // Auth::login($user);
+            Mail::to($user->email)->queue(new WelcomeMail($user));
 
-        Mail::to($user->email)->send(new WelcomeMail($user)); // Bo sung: Su dung thong qua Job + Queue
+            return to_route('login.form')->with('success', 'Đăng ký tài khoản thành công');
 
-        return to_route('login.form')->with('success', 'Đăng ký tài khoản thành công');
+        } catch (QueryException $e) {
+            // Trường hợp lỗi SQL (ví dụ email trùng)
+            return back()->withErrors(['email' => 'Email đã tồn tại hoặc lỗi hệ thống.'])->withInput();
+        } catch (Exception $e) {
+            // Các lỗi khác
+            return back()->withErrors(['error' => 'Đã xảy ra lỗi, vui lòng thử lại.'])->withInput();
+        }
     }
 
     public function showLogin()
@@ -56,13 +65,20 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        if ($this->authService->login($request->validated())) {
-            return to_route('posts.index')->with('success', 'Đăng nhập thành công');
-        }
+        try {
+            if ($this->authService->login($request->validated())) {
+                return to_route('posts.index')->with('success', 'Đăng nhập thành công');
+            }
 
-        return to_route('login.form')->withErrors([
-            'email' => 'Email hoặc mật khẩu không đúng.',
-        ]);
+            return to_route('login.form')->withErrors([
+                'email' => 'Email hoặc mật khẩu không đúng.',
+            ]);
+
+        } catch (Exception $e) {
+            return to_route('login.form')->withErrors([
+                'error' => 'Đã xảy ra lỗi khi đăng nhập, vui lòng thử lại.',
+            ]);
+        }
     }
 
     public function logout(Request $request)

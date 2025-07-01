@@ -8,7 +8,7 @@ class UpdateProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // cho phép mọi user thực hiện
+        return true;
     }
 
     public function rules(): array
@@ -23,13 +23,12 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'first_name.required' => 'Vui lòng nhập tên.',
-            'first_name.max'      => 'Tên không được vượt quá 30 ký tự.',
-
-            'last_name.required'  => 'Vui lòng nhập họ.',
-            'last_name.max'       => 'Họ không được vượt quá 20 ký tự.',
-
-            'address.max'         => 'Địa chỉ không được vượt quá 200 ký tự.',
+            'first_name.required' => 'Vui lòng nhập họ.',
+            'last_name.required'  => 'Vui lòng nhập tên.',
+            'first_name.max'      => 'Họ không quá 30 ký tự.',
+            'last_name.max'       => 'Tên không quá 20 ký tự.',
+            'address.max'         => 'Địa chỉ không quá 200 ký tự.',
         ];
     }
 }
+

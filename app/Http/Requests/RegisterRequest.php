@@ -37,11 +37,11 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'first_name.required' => 'Vui lòng nhập tên.',
-            'first_name.max'      => 'Tên không được vượt quá 30 ký tự.',
+            'first_name.required' => 'Vui lòng nhập họ.',
+            'first_name.max'      => 'Họ không được vượt quá 30 ký tự.',
 
-            'last_name.required'  => 'Vui lòng nhập họ.',
-            'last_name.max'       => 'Họ không được vượt quá 30 ký tự.',
+            'last_name.required'  => 'Vui lòng nhập tên.',
+            'last_name.max'       => 'Tên không được vượt quá 30 ký tự.',
 
             'email.required'      => 'Vui lòng nhập email.',
             'email.email'         => 'Email không đúng định dạng.',
@@ -54,6 +54,9 @@ class RegisterRequest extends FormRequest
             'password.mixed'      => 'Mật khẩu phải chứa chữ hoa và chữ thường.',
             'password.numbers'    => 'Mật khẩu phải chứa ít nhất một số.',
             'password.symbols'    => 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt.',
+
+            'password_confirmation.required' => 'Vui lòng nhập xác nhận mật khẩu.',
         ];
     }
+
 }

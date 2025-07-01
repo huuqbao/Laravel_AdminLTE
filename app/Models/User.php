@@ -31,10 +31,9 @@ class User extends Authenticatable
         return $this->first_name . ' ' . $this->last_name;
     }
 
-    public function getRoleEnumAttribute(): RoleStatus
-    {
-        return RoleStatus::from($this->role);
-    }
+    protected $casts = [
+        'role' => RoleStatus::class,
+    ];
 
     public function posts()
     {

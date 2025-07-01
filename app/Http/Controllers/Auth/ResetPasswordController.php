@@ -7,7 +7,9 @@ use App\Http\Requests\ResetPasswordRequest;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use Exception;
 
 class ResetPasswordController extends Controller
 {
@@ -18,18 +20,27 @@ class ResetPasswordController extends Controller
 
     public function reset(ResetPasswordRequest $request)
     {
-        $status = Password::reset(
-            $request->validated(),
-            function (User $user, string $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
-            }
-        );
+        try {
+            $status = Password::reset(
+                $request->validated(),
+                function (User $user, string $password) {
+                    $user->forceFill([
+                        'password' => Hash::make($password),
+                        'remember_token' => Str::random(60),
+                    ])->save();
+                }
+            );
 
-        return $status === Password::PASSWORD_RESET
-            ? to_route('login.form')->with('success', 'Đặt lại mật khẩu thành công.')
-            : back()->withErrors(['email' => __($status)])->withInput();
+            return $status === Password::PASSWORD_RESET
+                ? to_route('login.form')->with('success', 'Đặt lại mật khẩu thành công.')
+                : back()->withErrors(['email' => __($status)])->withInput();
+
+        } catch (Exception $e) {
+            Log::error('Lỗi đặt lại mật khẩu: ' . $e->getMessage());
+
+            return back()->withErrors([
+                'email' => 'Có lỗi xảy ra khi đặt lại mật khẩu. Vui lòng thử lại sau.'
+            ])->withInput();
+        }
     }
 }

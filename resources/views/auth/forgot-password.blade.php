@@ -12,19 +12,22 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('password.email') }}">
+        <form method="POST" action="{{ route('password.email') }}" novalidate>
             @csrf
 
             <div class="mb-3">
                 <label for="email" class="form-label fw-semibold">
                     Địa chỉ Email <span class="text-danger">*</span>
                 </label>
-                <input type="email" name="email" id="email"
+                <input type="text"
+                       name="email"
+                       id="email"
                        class="form-control form-control-lg @error('email') is-invalid @enderror"
-                       value="{{ old('email') }}" required autofocus
-                       placeholder="Nhập địa chỉ email của bạn">
+                       value="{{ old('email') }}"
+                       placeholder="Nhập địa chỉ email của bạn"
+                       autofocus>
                 @error('email')
-                    <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
             </div>
 
