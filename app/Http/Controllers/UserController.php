@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateProfileRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Exception;
 
 class UserController extends Controller
@@ -18,11 +19,16 @@ class UserController extends Controller
     public function update(UpdateProfileRequest $request)
     {
         try {
+            DB::beginTransaction();
+
             $user = Auth::user();
             $user->update($request->validated());
 
+            DB::commit();
+
             return to_route('profile.edit')->with('success', 'Cập nhật hồ sơ thành công.');
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error('Lỗi khi cập nhật hồ sơ: ' . $e->getMessage());
 
             return to_route('profile.edit')
