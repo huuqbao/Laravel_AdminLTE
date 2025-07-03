@@ -31,12 +31,13 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-sm btn-warning">Sửa</a>
+                        <a href="{{ route('news.index') }}" class="btn btn-sm btn-info" target="_blank">👁 Xem</a>
+                        <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-sm btn-warning">✏️ Sửa</a>
                         <form action="{{ route('posts.destroy', $post->id) }}" method="POST" class="d-inline"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');">
+                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger">Xoá</button>
+                            <button class="btn btn-sm btn-danger">🗑 Xoá</button>
                         </form>
                     </td>
                 </tr>
