@@ -8,76 +8,79 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Builder;
+use App\Enums\PostStatus;
 
 class Post extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
-        'user_id',
-        'title',
-        'slug',
-        'description',
-        'content',
-        'publish_date',
-        'status',
+        'user_id', 'title', 'slug', 'description', 'content', 'publish_date', 'status'
     ];
 
-    // Relationships
+    protected $casts = [
+        'publish_date' => 'datetime',
+        'status' => PostStatus::class,
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Accessor: thumbnail
-    public function getThumbnailAttribute(): string|null
+    public function getThumbnailAttribute(): ?string
     {
-        return $this->getFirstMediaUrl(collectionName: 'thumbnails') ?: null;
+        return $this->getFirstMediaUrl('thumbnail');
     }
 
-    // Accessor: trạng thái hiển thị
-    public function getStatusBadgeAttribute(): array
+    // Scopes (dùng enum thay vì số)
+    public function scopeNew($query)
     {
-        return [
-            'label' => match($this->status) {
-                0 => 'Mới',
-                1 => 'Đã cập nhật',
-                2 => 'Đã xuất bản',
-                default => 'Không xác định',
-            },
-            'class' => match($this->status) {
-                0 => 'secondary',
-                1 => 'info',
-                2 => 'success',
-                default => 'dark',
-            },
-        ];
+        return $query->where('status', PostStatus::DRAFT);
     }
 
-    // Scopes
-    public function scopeNew(Builder $query)
+    public function scopeUpdated($query)
     {
-        return $query->where('status', 0);
+        return $query->where('status', PostStatus::PENDING);
     }
 
-    public function scopeUpdated(Builder $query)
+    public function scopePublished($query)
     {
-        return $query->where('status', 1);
+        return $query->where('status', PostStatus::PUBLISHED);
     }
 
-    public function scopePublished(Builder $query)
+    public static function createUniqueSlug($title)
     {
-        return $query->whereNotNull('publish_date');
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 0;
+
+        while (self::withTrashed()->where('slug', $slug)->exists()) {
+            $count++;
+            $slug = $originalSlug . '-' . $count;
+        }
+
+        return $slug;
     }
 
-    // Optional: Tự động tạo slug nếu chưa có (có thể xử lý trong sự kiện model hoặc observer)
-    protected static function booted()
+    // public function getRouteKeyName()
+    // {
+    //     return 'slug';
+    // }
+
+    // Accessors
+    public function getStatusLabelAttribute(): string
     {
-        static::creating(function ($post) {
-            if (empty($post->slug)) {
-                $post->slug = Str::slug($post->title);
-            }
-        });
+        return $this->status->label();
+    }
+
+    public function getStatusClassAttribute(): string
+    {
+        return $this->status->badgeClass();
+    }
+
+    public function getStatusBadgeAttribute(): string
+    {
+        return sprintf('<span class="%s">%s</span>', $this->status_class, $this->status_label);
     }
 }

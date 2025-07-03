@@ -66,20 +66,18 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         try {
-            if ($this->authService->login($request->validated())) {
-                return to_route('posts.index')->with('success', 'Đăng nhập thành công');
-            }
+            $this->authService->login($request->validated());
 
-            return to_route('login.form')->withErrors([
-                'email' => 'Email hoặc mật khẩu không đúng.',
-            ]);
+            return to_route('posts.index')->with('success', 'Đăng nhập thành công');
 
-        } catch (Exception $e) {
-            return to_route('login.form')->withErrors([
-                'error' => 'Đã xảy ra lỗi khi đăng nhập, vui lòng thử lại.',
-            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Đã xảy ra lỗi khi đăng nhập, vui lòng thử lại.']);
         }
     }
+
 
     public function logout(Request $request)
     {

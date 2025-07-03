@@ -2,19 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PostStatus;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Http\Requests\PostRequest;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::where('user_id', Auth::id())
-                    ->latest()
-                    ->paginate(10); // bạn đang dùng paginate
+        $today = Carbon::now();
+
+        $posts = Post::where('publish_date', '<=', $today)
+                    ->orderBy('publish_date', 'desc')
+                    ->paginate(1);
+
+        if ($request->ajax()) {
+            return view('posts.partials._table', compact('posts'))->render();
+        }
+
         return view('posts.index', compact('posts'));
     }
 
@@ -27,74 +38,70 @@ class PostController extends Controller
     {
         $validated = $request->validated();
 
-        // Tạo slug duy nhất từ title
-        $slug = $validated['slug'] ?? Str::slug($validated['title']);
-        $originalSlug = $slug;
-        $i = 1;
-        while (Post::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $i;
-            $i++;
-        }
+        $validated['slug'] = Post::createUniqueSlug($validated['title']);
 
-        $post = new Post();
-        $post->fill($validated);
-        $post->user_id = Auth::id(); // phải có
-        $post->status = 0;
-        $post->slug = $slug;
-        $post->save(); // ⚠️ phải có
-
-        // Upload thumbnail (nếu có)
-        if ($request->hasFile('thumbnail')) {
-            $post->addMediaFromRequest('thumbnail')->toMediaCollection('thumbnails');
-        }
-        // dd($post->getMedia('thumbnail')->pluck('original_url'));
-        return to_route('posts.index')->with('success', 'Tạo bài viết thành công.');
-    }
-
-    public function show(Post $post)
-    {
-        $this->authorize('view', $post);
-        return view('posts.show', compact('post'));
-    }
-
-    public function edit(Post $post)
-    {
-        $this->authorize('update', $post); // thêm dòng này
-        return view('posts.edit', compact('post'));
-    }
-
-    public function update(PostRequest $request, Post $post)
-    {
-        $this->authorize('update', $post);
-        $validated = $request->validated();
+        $post = new Post($validated);
+        $post->user_id = Auth::id();
+        $post->status = Auth::user()?->is_admin
+            ? PostStatus::tryFrom($validated['status'] ?? PostStatus::DRAFT->value)
+            : PostStatus::DRAFT;
+        $post->publish_date = request()->filled('publish_date')
+            ? \Carbon\Carbon::parse(request()->input('publish_date'))
+            : null;
+        $post->save();
 
         if ($request->hasFile('thumbnail')) {
-            $post->addMediaFromRequest('thumbnail')->toMediaCollection('thumbnail');
+            $post->addMedia($request->file('thumbnail'))->toMediaCollection('thumbnail');
         }
 
-        $post->update($validated);
-
-        return to_route('posts.index')->with('success', 'Cập nhật bài viết thành công.');
+        return to_route('posts.index')->with('success', 'Tạo bài viết thành công');
     }
+
 
     public function destroy(Post $post)
     {
         $post->delete();
 
-        return back()->with('success', 'Xoá bài viết thành công.');
+        return redirect()->route('posts.index')->with('success', 'Xóa bài viết thành công');
     }
 
     public function destroyAll()
     {
-        Auth::user()->posts()->delete();
-
-        return back()->with('success', 'Xoá tất cả bài viết thành công.');
+        Post::query()->delete(); // hoặc Post::truncate();
+        return response()->json(['message' => 'Đã xoá tất cả bài viết']);
     }
 
-    public function checkSlug(Request $request)
+    public function edit(Post $post)
     {
-        $slug = $request->get('slug');
-        $exists = Post::where('slug', $slug)->exists();
-        return response()->json(['exists' => $exists]);
+        return view('posts.edit', compact('post'));
     }
+
+    public function update(PostRequest $request, Post $post)
+    {
+        $validated = $request->validated();
+
+        if (Auth::user()?->is_admin) {
+            $post->status = PostStatus::tryFrom($validated['status'] ?? $post->status->value) ?? $post->status;
+        }
+
+        $post->fill($validated);
+
+        // cập nhật publish_date nếu có
+        $post->publish_date = request()->filled('publish_date')
+                    ? \Carbon\Carbon::parse(request()->input('publish_date'))
+                    : null;
+
+        $post->status = $validated['status'] ?? $post->status;
+
+        $post->save();
+
+        // thumbnail mới?
+        if ($request->hasFile('thumbnail')) {
+            $post->clearMediaCollection('thumbnail');
+            $post->addMedia($request->file('thumbnail'))->toMediaCollection('thumbnail');
+        }
+
+        return to_route('posts.index')->with('success', 'Cập nhật bài viết thành công');
+    }
+
 }
