@@ -44,7 +44,7 @@
 
                     {{-- Họ --}}
                     <div class="mb-3">
-                        <label for="first_name" class="form-label">Họ</label>
+                        <label for="first_name" class="form-label">Họ <span class="text-danger">*</span></label>
                         <input type="text" name="first_name" id="first_name"
                             class="form-control @error('first_name') is-invalid @enderror"
                             value="{{ old('first_name', $user->first_name) }}">
@@ -55,7 +55,7 @@
 
                     {{-- Tên --}}
                     <div class="mb-3">
-                        <label for="last_name" class="form-label">Tên</label>
+                        <label for="last_name" class="form-label">Tên <span class="text-danger">*</span></label>
                         <input type="text" name="last_name" id="last_name"
                             class="form-control @error('last_name') is-invalid @enderror"
                             value="{{ old('last_name', $user->last_name) }}">
@@ -66,7 +66,7 @@
 
                     {{-- Địa chỉ --}}
                     <div class="mb-3">
-                        <label for="address" class="form-label">Địa chỉ</label>
+                        <label for="address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
                         <textarea name="address" id="address"
                             class="form-control @error('address') is-invalid @enderror"
                             rows="3">{{ old('address', $user->address) }}</textarea>
@@ -74,6 +74,7 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
 
                     <button class="btn btn-primary w-100">Lưu thay đổi</button>
                 </form>

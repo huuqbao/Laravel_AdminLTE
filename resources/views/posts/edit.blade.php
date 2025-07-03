@@ -13,25 +13,25 @@
         @method('PUT')
 
         <div class="mb-3">
-            <label>Tiêu đề</label>
+            <label>Tiêu đề <span class="text-danger">*</span></label>
             <input type="text" name="title" class="form-control" value="{{ old('title', $post->title) }}">
             @error('title') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label>Mô tả</label>
+            <label>Mô tả <span class="text-danger">*</span></label>
             <input type="text" name="description" class="form-control" value="{{ old('description', $post->description) }}">
             @error('description') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label>Nội dung</label>
+            <label>Nội dung <span class="text-danger">*</span></label>
             <textarea name="content" id="content" class="form-control" rows="10" style="resize: vertical;">{{ old('content', $post->content ?? '') }}</textarea>
             @error('content') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label>Ngày đăng</label>
+            <label>Ngày đăng <span class="text-danger">*</span></label>
             <input
                 type="datetime-local"
                 name="publish_date"
@@ -43,7 +43,7 @@
 
         @if (auth()->user()->is_admin)
             <div class="mb-3">
-                <label>Trạng thái</label>
+                <label>Trạng thái <span class="text-danger">*</span></label>
                 <select name="status" class="form-control">
                     <option value="0" {{ $post->status == 0 ? 'selected' : '' }}>Mới</option>
                     <option value="1" {{ $post->status == 1 ? 'selected' : '' }}>Đã cập nhật</option>
@@ -55,7 +55,7 @@
 
         <div class="mb-3">
             <label>Hình đại diện</label>
-            <input type="file" name="thumbnail" class="form-control"> {{-- KHÔNG required --}}
+            <input type="file" name="thumbnail" class="form-control">
             @if ($post->thumbnail)
                 <img src="{{ $post->thumbnail }}" width="80" class="mt-2 border rounded">
             @endif
