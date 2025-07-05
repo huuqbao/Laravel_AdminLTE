@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use App\Mail\WelcomeMail;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
@@ -19,7 +20,7 @@ use Exception;
 
 class AuthController extends Controller
 {
-    protected AuthService $authService;
+    protected AuthService $authService;  //Khai báo một thuộc tính để lưu đối tượng AuthService
 
     public function __construct(AuthService $authService)
     {
@@ -31,8 +32,10 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request)  //tham số truyền vào hàm là 1 đối tượng thuộc RegisterRequest
     {
+        DB::beginTransaction();
+
         try {
             $validated = $request->validated();
 
@@ -47,13 +50,15 @@ class AuthController extends Controller
 
             Mail::to($user->email)->queue(new WelcomeMail($user));
 
+            DB::commit();
+
             return to_route('login.form')->with('success', 'Đăng ký tài khoản thành công');
 
         } catch (QueryException $e) {
-            // Trường hợp lỗi SQL (ví dụ email trùng)
+            DB::rollBack(); // rollback khi lỗi SQL
             return back()->withErrors(['email' => 'Email đã tồn tại hoặc lỗi hệ thống.'])->withInput();
         } catch (Exception $e) {
-            // Các lỗi khác
+            DB::rollBack(); // rollback khi lỗi khác
             return back()->withErrors(['error' => 'Đã xảy ra lỗi, vui lòng thử lại.'])->withInput();
         }
     }
@@ -82,8 +87,8 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->session()->invalidate(); //xoa du lieu
+        $request->session()->regenerateToken(); // Tao token moi
 
         return to_route('login.form');
     }

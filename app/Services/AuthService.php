@@ -6,17 +6,18 @@ use App\Enums\UserStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class AuthService
+class AuthService //kiem tra dang nhap
 {
     public function login(array $credentials): bool
     {
-        if (!Auth::attempt([ // đã dùng attempt check status
-            'email' => $credentials['email'],
+        if (!Auth::attempt([ //kiem tra dang nhap thanh cong hay that bai
+            'email' => $credentials['email'], 
             'password' => $credentials['password'],
         ])) {
-            return false; // Sai email hoặc mật khẩu
+            throw ValidationException::withMessages([
+                'email' => 'Email hoặc mật khẩu không đúng.',
+            ]);
         }
-
         $user = Auth::user();
 
         // Check status sau khi đăng nhập

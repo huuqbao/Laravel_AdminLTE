@@ -11,10 +11,9 @@ class CheckAccountStatus
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check()) {
+        if (!Auth::check()) { //kiem tra da dang nhap chua
             return to_route('login');
         }
-
         $user = Auth::user();
 
         return match ($user->status) {

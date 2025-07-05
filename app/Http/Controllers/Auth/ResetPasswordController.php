@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use Exception;
 
@@ -15,7 +16,7 @@ class ResetPasswordController extends Controller
 {
     public function showResetForm($token)
     {
-        return view('auth.reset-password', ['token' => $token]);
+        return view('auth.reset-password', ['token' => $token]);//gui token tu URL vao view
     }
 
     public function reset(ResetPasswordRequest $request)
@@ -23,7 +24,7 @@ class ResetPasswordController extends Controller
         try {
             $status = Password::reset(
                 $request->validated(),
-                function (User $user, string $password) {
+                function (User $user, string $password) { //closure ham an
                     $user->forceFill([
                         'password' => Hash::make($password),
                         'remember_token' => Str::random(60),

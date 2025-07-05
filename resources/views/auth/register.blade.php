@@ -13,7 +13,6 @@
                 {{ session('success') }}
             </div>
         @endif
-        {{-- Route register params, casch dinhj nghiaxm suwr dungj --}}
         <form action="{{ route('register') }}" id="registerForm" method="POST" novalidate>
             @csrf
 

@@ -15,14 +15,14 @@ Route::get('/', function () {
 })->name('welcome');
 
 // Trang chủ sau đăng nhập
-Route::get('/home', fn() => view('home'))
+Route::get('/home', fn() => view('home')) // hàm ẩn danh fn() => view('home')
     ->middleware(['auth', CheckAccountStatus::class])
     ->name('home');
 
 // Nhóm route cho khách (chưa login)
 Route::middleware('guest')->group(function () {
     // Đăng ký
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register.form');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register.form'); 
     Route::post('/register', [AuthController::class, 'register'])->name('register');
 
     // Đăng nhập
@@ -45,6 +45,14 @@ Route::middleware(['auth', CheckAccountStatus::class])->group(function () {
     // Quản lý bài viết
     Route::delete('/posts/delete-all', [PostController::class, 'destroyAll'])->name('posts.destroyAll');
     Route::resource('posts', PostController::class); // đầy đủ CRUD
+    // Bao gồm:
+    // GET     /posts              => posts.index   (Hiển thị danh sách bài viết)
+    // GET     /posts/create       => posts.create  (Hiển thị form tạo bài viết)
+    // POST    /posts              => posts.store   (Lưu bài viết mới)
+    // GET     /posts/{post}       => posts.show    (Hiển thị chi tiết bài viết)
+    // GET     /posts/{post}/edit  => posts.edit    (Hiển thị form chỉnh sửa)
+    // PUT     /posts/{post}       => posts.update  (Cập nhật bài viết)
+    // DELETE  /posts/{post}       => posts.destroy (Xoá bài viết)
 });
 
 // Profile user (chỉ cần đăng nhập)
