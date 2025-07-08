@@ -41,13 +41,13 @@
             @error('publish_date') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
-        @if (auth()->user()->is_admin)
+        @if (isset($post) && $post->user_id === auth()->id())
             <div class="mb-3">
                 <label>Trạng thái <span class="text-danger">*</span></label>
                 <select name="status" class="form-control">
-                    <option value="0" {{ $post->status == 0 ? 'selected' : '' }}>Mới</option>
-                    <option value="1" {{ $post->status == 1 ? 'selected' : '' }}>Đã cập nhật</option>
-                    <option value="2" {{ $post->status == 2 ? 'selected' : '' }}>Đã xuất bản</option>
+                    <option value="0" {{ $post->status == 0 ? 'selected' : '' }}>Bài viết mới</option>
+                    <option value="1" {{ $post->status == 1 ? 'selected' : '' }}>Được cập nhật</option>
+                    <option value="2" {{ $post->status == 2 ? 'selected' : '' }}>Đã xuất bản</option>   
                 </select>
                 @error('status') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
@@ -56,8 +56,8 @@
         <div class="mb-3">
             <label>Hình đại diện</label>
             <input type="file" name="thumbnail" class="form-control">
-            @if ($post->thumbnail)
-                <img src="{{ $post->thumbnail }}" width="80" class="mt-2 border rounded">
+            @if ($post->getFirstMediaUrl('thumbnail'))
+                <img src="{{ $post->getFirstMediaUrl('thumbnail') }}" width="80" class="mt-2 border rounded">
             @endif
         </div>
 

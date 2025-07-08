@@ -66,7 +66,7 @@
 
                     {{-- Địa chỉ --}}
                     <div class="mb-3">
-                        <label for="address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <label for="address" class="form-label">Địa chỉ </span></label>
                         <textarea name="address" id="address"
                             class="form-control @error('address') is-invalid @enderror"
                             rows="3">{{ old('address', $user->address) }}</textarea>

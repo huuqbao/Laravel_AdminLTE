@@ -22,7 +22,7 @@
                 <input type="text"
                        name="email"
                        id="email"
-                       class="form-control form-control-lg @error('email') is-invalid @enderror"
+                       class="form-control form-control-lg"
                        value="{{ old('email') }}"
                        placeholder="Nhập địa chỉ email của bạn"
                        autofocus>

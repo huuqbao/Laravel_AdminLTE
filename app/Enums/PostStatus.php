@@ -4,15 +4,15 @@ namespace App\Enums;
 
 enum PostStatus: int
 {
-    case DRAFT = 0;
-    case PENDING = 1;
+    case NEW = 0;
+    case UPDATED = 1;
     case PUBLISHED = 2;
 
     public function label(): string
     {
         return match ($this) {
-            self::DRAFT => 'Nháp',
-            self::PENDING => 'Chờ duyệt',
+            self::NEW => 'Bài viết mới',
+            self::UPDATED => 'Được cập nhật',
             self::PUBLISHED => 'Đã xuất bản',
         };
     }
@@ -20,8 +20,8 @@ enum PostStatus: int
     public function badgeClass(): string
     {
         return match ($this) {
-            self::DRAFT => 'badge bg-secondary',
-            self::PENDING => 'badge bg-warning text-dark',
+            self::NEW => 'badge bg-secondary',
+            self::UPDATED => 'badge bg-warning text-dark',
             self::PUBLISHED => 'badge bg-success',
         };
     }

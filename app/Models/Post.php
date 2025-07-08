@@ -36,12 +36,12 @@ class Post extends Model implements HasMedia
     // Scopes (dùng enum thay vì số)
     public function scopeNew($query)
     {
-        return $query->where('status', PostStatus::DRAFT);
+        return $query->where('status', PostStatus::NEW);
     }
 
     public function scopeUpdated($query)
     {
-        return $query->where('status', PostStatus::PENDING);
+        return $query->where('status', PostStatus::UPDATED);
     }
 
     public function scopePublished($query)

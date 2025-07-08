@@ -20,27 +20,36 @@ class PostRequest extends FormRequest
         return true;
     }
 
-    public function rules()
+    public function rules(): array
     {
+        $isUpdate = $this->route('post') !== null;
+
         return [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:500',
+            'title' => 'required|string|max:300',
+            'slug' => 'nullable|string|max:300',
+            'description' => 'nullable|string|max:300',
             'content' => 'required|string',
-            'publish_date' => 'required|date',
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'publish_date' => 'nullable|date',
+            'status' => 'nullable|in:0,1,2',
+            'thumbnail' => [
+                $isUpdate ? 'nullable' : 'required',
+                'image',
+                'mimes:jpeg,png,jpg,gif,svg',
+                'max:2048',
+            ],
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
-            'title.required' => 'Vui lòng nhập tiêu đề',
-            'description.required' => 'Vui lòng nhập mô tả',
-            'content.required' => 'Vui lòng nhập nội dung',
-            'publish_date.required' => 'Vui lòng nhập ngày đăng',
-            'thumbnail.required' => 'Vui lòng chọn ảnh',
-            'thumbnail.image' => 'Tệp tải lên phải là hình ảnh',
-            'thumbnail.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, gif hoặc svg',
+            'title.required' => 'Vui lòng nhập tiêu đề.',
+            'title.max' => 'Tiêu đề tối đa 300 ký tự.',
+            'description.max' => 'Mô tả tối đa 300 ký tự.',
+            'content.required' => 'Vui lòng nhập nội dung.',
+            'thumbnail.required' => 'Vui lòng chọn ảnh.',
+            'thumbnail.image' => 'Tệp phải là ảnh.',
+            'thumbnail.mimes' => 'Chỉ chấp nhận: jpeg, png, jpg, gif, svg.',
         ];
     }
 }

@@ -24,10 +24,6 @@
                     <a href="#" class="list-group-item list-group-item-action">📊 Báo cáo hoạt động</a>
                     <a href="#" class="list-group-item list-group-item-action">🔒 Đổi mật khẩu</a>
                     <a href="#" class="list-group-item list-group-item-action">❓ Trợ giúp & Hỗ trợ</a>
-                    <a href="#" class="list-group-item list-group-item-action">🧾 Quản lý đơn hàng</a>
-                    <a href="#" class="list-group-item list-group-item-action">📥 Nội dung đã lưu</a>
-                    <a href="#" class="list-group-item list-group-item-action">🌐 Quản lý website</a>
-                    <a href="#" class="list-group-item list-group-item-action">📢 Thông báo hệ thống</a>
                 </div>
             </div>
         </div>
@@ -49,64 +45,97 @@
                 </div>
             @endif
 
-            {{-- Bảng bài viết --}}
-            @include('posts.partials._table')
+            {{-- Bảng danh sách bài viết --}}
+            <div id="post-list">
+                <table id="postTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">STT</th>
+                            <th style="width: 70px;">Thumbnail</th>
+                            <th>Tiêu đề</th>
+                            <th>Mô tả</th>
+                            <th>Ngày đăng</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center" style="width: 130px;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($posts as $index => $post)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>
+                                    @if ($post->getFirstMediaUrl('thumbnail'))
+                                        <img src="{{ $post->getFirstMediaUrl('thumbnail') }}" alt="Thumbnail" width="60">
+                                    @else
+                                        <span class="text-muted">Không có</span>
+                                    @endif
+                                </td>
+                                <td>{{ $post->title }}</td>
+                                <td>{{ \Illuminate\Support\Str::limit($post->description, 50) }}</td>
+                                <td>{{ $post->publish_date ? $post->publish_date->format('d/m/Y H:i') : 'Chưa đăng' }}</td>
+                                <td>
+                                    <span class="{{ $post->status->badgeClass() }}">
+                                        {{ $post->status->label() }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ route('news.index') }}" class="btn btn-sm btn-info" target="_blank">👁 Xem</a>
+                                    <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-sm btn-warning">✏️ Sửa</a>
+                                    <form action="{{ route('posts.destroy', $post->id) }}" method="POST" class="d-inline"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-danger">🗑 Xoá</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">Không có bài viết nào</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 @endsection
 
 @push('scripts')
-<script>
-    document.getElementById('delete-all-btn')?.addEventListener('click', function (e) {
-        e.preventDefault();
+    {{-- ✅ DataTables v2.3.2 --}}
+    <link rel="stylesheet" href="//cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
 
-        if (!confirm('Bạn có chắc chắn muốn xoá toàn bộ bài viết?')) return;
+    @if ($posts->count()) {{-- Kiểm tra xem có bài viết không, Chỉ chạy đoạn code nếu có dữ liệu --}}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // ✅ Khởi tạo DataTable khi có bài viết
+                new DataTable('#postTable', {
+                    pageLength: 3 
+                });
 
-        fetch('{{ route('posts.destroyAll') }}', {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert(data.message);
-            // Reload danh sách trang 1
-            fetch('{{ route('posts.index') }}', {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(res => res.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const newDoc = parser.parseFromString(html, 'text/html');
-                const newTable = newDoc.querySelector('#post-list');
-                document.querySelector('#post-list').innerHTML = newTable.innerHTML;
+                // ✅ Xử lý xoá tất cả bài viết
+                document.getElementById('delete-all-btn')?.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (!confirm('Bạn có chắc chắn muốn xoá toàn bộ bài viết?')) return;
+
+                    fetch('{{ route('posts.destroyAll') }}', {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        alert(data.message);
+                        location.reload();
+                    })
+                    .catch(error => alert('Lỗi khi xoá tất cả: ' + error));
+                });
             });
-        })
-        .catch(error => alert('Lỗi khi xoá tất cả: ' + error));
-    });
-
-    // Xử lý phân trang AJAX
-    document.addEventListener('DOMContentLoaded', function () {
-        document.addEventListener('click', function (e) {
-            const target = e.target.closest('.pagination a');
-            if (target) {
-                e.preventDefault();
-                fetch(target.href, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(res => res.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const newDoc = parser.parseFromString(html, 'text/html');
-                    const newTable = newDoc.querySelector('#post-list');
-                    document.querySelector('#post-list').innerHTML = newTable.innerHTML;
-                })
-                .catch(error => console.error('Lỗi phân trang:', error));
-            }
-        });
-    });
-</script>
+        </script>
+    @endif
 @endpush

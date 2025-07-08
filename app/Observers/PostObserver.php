@@ -9,32 +9,34 @@ class PostObserver
 {
     public function creating(Post $post)
     {
-        if (empty($post->slug)) {
-            $post->slug = Str::slug($post->title);
-        }
-
-        $originalSlug = $post->slug;
-        $i = 1;
-
-        while (Post::where('slug', $post->slug)->exists()) {
-            $post->slug = $originalSlug . '-' . $i++;
-        }
+        $this->setUniqueSlug($post);
     }
 
     public function updating(Post $post)
     {
-        if ($post->isDirty('title')) {
-            $post->slug = Str::slug($post->title);
-            $originalSlug = $post->slug;
-            $i = 1;
-
-            while (
-                Post::where('slug', $post->slug)
-                    ->where('id', '!=', $post->id)
-                    ->exists()
-            ) {
-                $post->slug = $originalSlug . '-' . $i++;
-            }
+        if ($post->isDirty('title') && empty($post->slug)) {
+            $this->setUniqueSlug($post);
         }
+    }
+
+    protected function setUniqueSlug(Post $post): void
+    {
+        $baseSlug = Str::slug($post->title);
+
+        // Nếu slug trống thì đặt mặc định từ title
+        $slug = $post->slug ?: $baseSlug;
+
+        $originalSlug = $slug;
+        $i = 1;
+
+        while (
+            Post::where('slug', $slug)
+                ->when($post->exists, fn ($query) => $query->where('id', '!=', $post->id))
+                ->exists()
+        ) {
+            $slug = $originalSlug . '-' . $i++;
+        }
+
+        $post->slug = $slug;
     }
 }

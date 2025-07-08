@@ -10,26 +10,21 @@ use App\Http\Controllers\NewsController;
 use App\Http\Middleware\CheckAccountStatus;
 
 // Trang chính
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::get('/', fn() => view('welcome'))->name('welcome');
 
 // Trang chủ sau đăng nhập
-Route::get('/home', fn() => view('home')) // hàm ẩn danh fn() => view('home')
+Route::get('/home', fn() => view('home'))
     ->middleware(['auth', CheckAccountStatus::class])
     ->name('home');
 
-// Nhóm route cho khách (chưa login)
+// 1. Nhóm route cho khách (chưa login)
 Route::middleware('guest')->group(function () {
-    // Đăng ký
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register.form'); 
     Route::post('/register', [AuthController::class, 'register'])->name('register');
 
-    // Đăng nhập
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login.form');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-    // Quên mật khẩu & reset
     Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
@@ -37,29 +32,44 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
-// Nhóm route sau khi đăng nhập (và qua middleware kiểm tra trạng thái tài khoản)
+
+// 2. Nhóm route sau khi login + kiểm tra trạng thái tài khoản
 Route::middleware(['auth', CheckAccountStatus::class])->group(function () {
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Quản lý bài viết
+    // Quản lý bài viết (của user)
     Route::delete('/posts/delete-all', [PostController::class, 'destroyAll'])->name('posts.destroyAll');
-    Route::resource('posts', PostController::class); // đầy đủ CRUD
-    // Bao gồm:
-    // GET     /posts              => posts.index   (Hiển thị danh sách bài viết)
-    // GET     /posts/create       => posts.create  (Hiển thị form tạo bài viết)
-    // POST    /posts              => posts.store   (Lưu bài viết mới)
-    // GET     /posts/{post}       => posts.show    (Hiển thị chi tiết bài viết)
-    // GET     /posts/{post}/edit  => posts.edit    (Hiển thị form chỉnh sửa)
-    // PUT     /posts/{post}       => posts.update  (Cập nhật bài viết)
-    // DELETE  /posts/{post}       => posts.destroy (Xoá bài viết)
+    
+    Route::resource('posts', PostController::class);
+    // Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+    // Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+    // Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    // Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+    // Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+    // Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    // Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
-// Profile user (chỉ cần đăng nhập)
+
+// 3. Profile user (chỉ cần login, không cần check trạng thái)
 Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [UserController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile/update', [UserController::class, 'update'])->name('profile.update');
 });
 
+
+// 4. Trang tin tức (ai cũng xem được)
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{post:slug}', [NewsController::class, 'show'])->name('news.show');
+
+
+// ==========================
+// 5. Admin area (chỉ admin được vào)
+// ==========================
+// Route::prefix('admin')
+//     ->middleware(['auth', 'is_admin'])
+//     ->name('admin.')
+//     ->group(function () {
+//         Route::resource('posts', AdminPostController::class);
+//     });
