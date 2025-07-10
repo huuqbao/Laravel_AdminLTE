@@ -20,9 +20,9 @@ class UpdatePostRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'title' => 'required|string|max:100',
+            'title' => 'required|string|max:300',
             'slug' => 'nullable|string|max:300',
-            'description' => 'required|string|max:300',
+            'description' => 'required|string|max:500',
             'content' => 'required|string',
             'publish_date' => 'required|date',
             'thumbnail' => [

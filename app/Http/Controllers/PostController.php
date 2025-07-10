@@ -7,6 +7,7 @@ use App\Http\Requests\PostRequest\UpdatePostRequest;
 use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
@@ -17,14 +18,23 @@ class PostController extends Controller
         $this->middleware('can:delete,post')->only(['destroy']);
     }
 
+    // public function index()
+    // {
+    //    // Lấy toàn bộ bài viết đã đăng
+    //     $posts = Post::where('user_id', Auth::id())
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+    //     return view('posts.index', compact('posts'));
+    // }
     public function index()
     {
-       // Lấy toàn bộ bài viết đã đăng
-        $posts = Post::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return view('posts.index');
+    }
 
-        return view('posts.index', compact('posts'));
+    public function getData(Request $request)
+    {
+        return response()->json($this->postService->getDatatablePosts($request));
     }
 
     public function create()

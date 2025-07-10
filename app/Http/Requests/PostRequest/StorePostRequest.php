@@ -8,25 +8,25 @@ use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Enums\RoleStatus;
-
+use App\Models\Post;
 
 class StorePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::user()?->can('create', \App\Models\Post::class);
+        return Auth::user()?->can('create', Post::class);
     }
 
     public function rules(): array
     {
         $rules = [
-            'title' => 'required|string|max:100',
+            'title' => 'required|string|max:300',
             'slug' => 'nullable|string|max:300',
-            'description' => 'required|string|max:300',
+            'description' => 'required|string|max:500',
             'content' => 'required|string',
             'publish_date' => 'required|date',
             'thumbnail' => [
-                'nullable',
+                'required',
                 'image',
                 'mimes:jpeg,png,jpg,gif,svg',
                 'max:2048',
@@ -57,6 +57,7 @@ class StorePostRequest extends FormRequest
             'description.max' => 'Mô tả tối đa 500 ký tự.',
             'content.required' => 'Vui lòng nhập nội dung.',
             'publish_date.required' => 'Vui lòng chọn ngày đăng.',
+            'thumbnail.required' => 'Vui lòng chọn ảnh.',
             'thumbnail.required' => 'Vui lòng chọn ảnh.',
             'thumbnail.image' => 'Tệp phải là ảnh.',
             'thumbnail.mimes' => 'Chỉ chấp nhận: jpeg, png, jpg, gif, svg.',

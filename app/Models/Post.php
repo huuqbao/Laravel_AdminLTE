@@ -69,12 +69,12 @@ class Post extends Model implements HasMedia
     // }
 
     // Accessors
-    public function getStatusLabelAttribute(): string
+    public function getStatusLabelAttribute()
     {
-        return $this->status->label();
+        return $this->status->label(); 
     }
 
-    public function getStatusClassAttribute(): string
+    public function getStatusClassAttribute()
     {
         return $this->status->badgeClass();
     }

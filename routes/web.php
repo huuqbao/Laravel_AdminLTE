@@ -38,6 +38,7 @@ Route::middleware(['auth', 'check.account'])->group(function () {
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::get('/posts/data', [PostController::class, 'getData'])->name('posts.data');
     // Quản lý bài viết (của user)
     Route::delete('/posts/delete-all', [PostController::class, 'destroyAll'])->name('posts.destroyAll');
     
@@ -49,8 +50,6 @@ Route::middleware(['auth', 'check.account'])->group(function () {
     // Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     // Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     // Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
-
-    
 });
 
 

@@ -27,6 +27,6 @@
     <hr>
     <p><strong>Trạng thái:</strong> <span class="{{ $post->status->badgeClass() }}">{{ $post->status->label() }}</span></p>
 
-    <a href="{{ route('posts.index') }}" class="btn btn-secondary mt-3">⬅️ Quay lại danh sách</a>
+    <a href="{{ route('posts.index') }}" class="btn btn-secondary mt-3">Quay lại danh sách</a>
 </div>
 @endsection

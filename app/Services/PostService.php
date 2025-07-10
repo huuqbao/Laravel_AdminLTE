@@ -8,8 +8,8 @@ use App\Enums\RoleStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PostService
 {
@@ -60,7 +60,6 @@ class PostService
                 ? now()->parse($request->input('publish_date'))
                 : null;
 
-            // Nếu là admin mới xử lý status
             if (Auth::check() && Auth::user()?->role === RoleStatus::ADMIN->value) {
                 $updateData['status'] = PostStatus::from(
                     $validated['status'] ?? $post->status->value
@@ -69,10 +68,12 @@ class PostService
                 unset($updateData['status']);
             }
 
-            // Cập nhật bài viết
+            if (isset($updateData['title']) && $updateData['title'] !== $post->title) {
+                $updateData['slug'] = null;
+            }
+
             $post->update($updateData);
 
-            // Nếu có thumbnail mới, xoá cái cũ và gán cái mới
             if ($request->hasFile('thumbnail')) {
                 $post->clearMediaCollection('thumbnail');
                 $post->addMediaFromRequest('thumbnail')->toMediaCollection('thumbnail');
@@ -86,5 +87,51 @@ class PostService
             throw $e;
         }
     }
+
+    public function getDatatablePosts(Request $request): array
+    {
+        $query = Post::query()->where('user_id', Auth::id());
+
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $total = $query->count();
+        $start = (int) $request->input('start', 0);
+        $length = (int) $request->input('length', 10);
+
+        $columns = ['id', 'thumbnail', 'title', 'description', 'publish_date', 'status']; 
+        $order = $request->input('order.0', ['column' => 0, 'dir' => 'desc']);
+        $columnIndex = (int) ($order['column'] ?? 0);
+        $sortColumn = $columns[$columnIndex] ?? 'id';
+        $sortDir = $order['dir'] === 'asc' ? 'asc' : 'desc';
+
+
+        $posts = $query->orderBy($sortColumn, $sortDir)
+            ->paginate($length, ['*'], 'page', intval($start / $length) + 1);
+
+        $data = $posts->map(function ($post, $index) use ($start) {
+            return [
+                'DT_RowIndex' => $start + $index + 1,
+                'thumbnail' => $post->thumbnail,
+                'title' => Str::limit($post->title, 50),
+                'description' => Str::limit($post->description, 80),
+                'publish_date' => $post->publish_date,
+                'status' => $post->status_badge,
+                'id' => $post->id
+            ];
+        })->toArray();
+
+        return [
+            'draw' => (int) $request->input('draw'),
+            'recordsTotal' => Post::where('user_id', Auth::id())->count(),
+            'recordsFiltered' => $total,
+            'data' => $data,
+        ];
+    }
+
 
 }

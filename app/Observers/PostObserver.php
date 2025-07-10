@@ -14,10 +14,11 @@ class PostObserver
 
     public function updating(Post $post)
     {
-        if ($post->isDirty('title') && empty($post->slug)) {
+        if ($post->isDirty('title')) {
             $this->setUniqueSlug($post);
         }
     }
+
 
     protected function setUniqueSlug(Post $post): void
     {
