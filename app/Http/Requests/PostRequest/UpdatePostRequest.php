@@ -1,43 +1,51 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\PostRequest;
 
 use App\Enums\PostStatus;
+use App\Enums\RoleStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\UploadedFile;
-use App\Models\Post;
 use Illuminate\Validation\Rules\Enum;
-/**
- * @property-read Post|null $post
- * @method bool hasFile(string $key)
- * @method UploadedFile|null file(string $key)
- * @method \Illuminate\Routing\Route route(string|null $key = null, mixed $default = null)
- */
-class PostRequest extends FormRequest
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+
+class UpdatePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $post = request()->route('post');
+        return $post && Auth::user()?->can('update', $post);
     }
 
     public function rules(): array
     {
-        $isUpdate = $this->route('post') !== null;
-
-        return [
+        $rules = [
             'title' => 'required|string|max:100',
             'slug' => 'nullable|string|max:300',
             'description' => 'required|string|max:300',
             'content' => 'required|string',
             'publish_date' => 'required|date',
-            'status' => ['nullable', new Enum(PostStatus::class)],
             'thumbnail' => [
-                $isUpdate ? 'nullable' : 'required',
+                'nullable',
                 'image',
                 'mimes:jpeg,png,jpg,gif,svg',
                 'max:2048',
             ],
         ];
+
+        // Nếu là admin thì mới cho phép submit status
+        if (Auth::check() && Auth::user()?->role === RoleStatus::ADMIN->value) {
+            $rules['status'] = [
+                'required',
+                Rule::in([
+                    PostStatus::NEW->value,
+                    PostStatus::UPDATED->value,
+                    PostStatus::PUBLISHED->value,
+                ]),
+            ];
+        }
+
+        return $rules;
     }
 
     public function messages(): array
@@ -49,10 +57,10 @@ class PostRequest extends FormRequest
             'description.max' => 'Mô tả tối đa 500 ký tự.',
             'content.required' => 'Vui lòng nhập nội dung.',
             'publish_date.required' => 'Vui lòng chọn ngày đăng.',
-            'thumbnail.required' => 'Vui lòng chọn ảnh.',
             'thumbnail.image' => 'Tệp phải là ảnh.',
             'thumbnail.mimes' => 'Chỉ chấp nhận: jpeg, png, jpg, gif, svg.',
             'status.enum' => 'Trạng thái không hợp lệ.',
+            'status.required' => 'Vui lòng chọn trạng thái.',
         ];
     }
 }

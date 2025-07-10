@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use Illuminate\Http\Request;
 use App\Enums\PostStatus;
+use Illuminate\Support\Carbon;
 
 class NewsController extends Controller
 {
     public function index()
     {
+        $today = Carbon::now();
+
         $posts = Post::where('status', PostStatus::PUBLISHED)
+                    ->where('publish_date', '<=', $today)
                     ->orderByDesc('publish_date')
                     ->paginate(6);
 

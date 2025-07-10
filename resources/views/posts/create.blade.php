@@ -13,13 +13,13 @@
 
         <div class="mb-3">
             <label for="title">Tiêu đề <span class="text-danger">*</span></label>
-            <input type="text" name="title" class="form-control" value="{{ old('title') }}" maxlength="100">
+            <input type="text" name="title" class="form-control" value="{{ old('title') }}" maxlength="300">
             @error('title') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
             <label for="description">Mô tả <span class="text-danger">*</span></label>
-            <textarea name="description" class="form-control" maxlength="300">{{ old('description') }}</textarea>
+            <textarea name="description" class="form-control" maxlength="500">{{ old('description') }}</textarea>
             @error('description') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
@@ -30,18 +30,18 @@
         </div>
 
         <div class="mb-3">
-            <label for="publish_date">Ngày đăng</label>
+            <label for="publish_date">Ngày đăng <span class="text-danger">*</span></label>
             <input type="datetime-local" name="publish_date" class="form-control" value="{{ old('publish_date') }}">
             @error('publish_date') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label for="thumbnail">Ảnh đại diện</label>
+            <label for="thumbnail">Ảnh đại diện <span class="text-danger">*</span></label>
             <input type="file" name="thumbnail" class="form-control">
             @error('thumbnail') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
-        @if (auth()->user()->is_admin || (isset($post) && $post->user_id === auth()->id()) || request()->routeIs('posts.create'))
+        {{-- @if (auth()->user()->is_admin || (isset($post) && $post->user_id === auth()->id()) || request()->routeIs('posts.create'))
             <div class="mb-3">
                 <label for="status">Trạng thái</label>
                 <select name="status" class="form-control">
@@ -51,7 +51,7 @@
                 </select>
                 @error('status') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
-        @endif
+        @endif --}}
 
         <button type="submit" class="btn btn-primary">Tạo bài viết</button>
     </form>

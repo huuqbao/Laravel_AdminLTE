@@ -15,12 +15,17 @@
                     <a href="{{ route('posts.index') }}" class="list-group-item list-group-item-action">
                         📄 Danh sách bài viết
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        👤 Thông tin cá nhân
-                    </a>
 
                     <a href="{{ route('profile.edit') }}" class="list-group-item list-group-item-action">
-                        👤 Cập nhật hồ sơ
+                        📝 Cập nhật hồ sơ
+                    </a>
+
+                    <a href="{{ route('news.index') }}" class="list-group-item list-group-item-action">
+                        📬 News
+                    </a>
+
+                    <a href="#" class="list-group-item list-group-item-action">
+                        👤 Thông tin cá nhân
                     </a>
                     
                     <a href="#" class="list-group-item list-group-item-action">

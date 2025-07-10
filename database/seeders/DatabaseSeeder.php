@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Post;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,26 +14,30 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Tạo tài khoản Admin theo yêu cầu
-        User::create([
-            'first_name' => 'Admin',
-            'last_name' => 'Super',
-            'email' => 'superadmin@khgc.com',
-            'password' => Hash::make('Abcd@1234'),
-            'address' => 'Hà Nội',
-            'status' => 1,
-            'role' => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'superadmin@khgc.com'],
+            [
+                'first_name' => 'Admin',
+                'last_name' => 'Super',
+                'password' => Hash::make('Abcd@1234'),
+                'address' => 'Hà Nội',
+                'status' => 1,
+                'role' => 'admin',
+            ]
+        );
 
-        // Tạo user test
-        User::create([
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password'),
-            'address' => 'Tp.HCM',
-            'status' => 1,
-            'role' => 'user',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'password' => Hash::make('password'),
+                'address' => 'Tp.HCM',
+                'status' => 1,
+                'role' => 'user',
+            ]
+        );
+
+        Post::factory()->count(50)->create();
     }
 }

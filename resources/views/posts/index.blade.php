@@ -16,10 +16,10 @@
                        class="list-group-item list-group-item-action {{ request()->routeIs('posts.index') ? 'bg-success text-white' : '' }}">
                         📄 Danh sách bài viết
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action">👤 Thông tin cá nhân</a>
                     <a href="{{ route('profile.edit') }}" class="list-group-item list-group-item-action">📝 Cập nhật hồ sơ</a>
+                    <a href="{{ route('news.index') }}" class="list-group-item list-group-item-action">📬 News</a>
+                    <a href="#" class="list-group-item list-group-item-action">👤 Thông tin cá nhân</a>
                     <a href="#" class="list-group-item list-group-item-action">⚙️ Cài đặt</a>
-                    <a href="#" class="list-group-item list-group-item-action">📬 Hộp thư đến</a>
                     <a href="#" class="list-group-item list-group-item-action">🛒 Lịch sử mua hàng</a>
                     <a href="#" class="list-group-item list-group-item-action">📊 Báo cáo hoạt động</a>
                     <a href="#" class="list-group-item list-group-item-action">🔒 Đổi mật khẩu</a>
@@ -79,7 +79,7 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('news.index') }}" class="btn btn-sm btn-info" target="_blank">👁 Xem</a>
+                                    <a href="{{ route('posts.show', $post->id) }}" class="btn btn-sm btn-info" target="_blank">👁 Xem</a>
                                     <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-sm btn-warning">✏️ Sửa</a>
                                     <form action="{{ route('posts.destroy', $post->id) }}" method="POST" class="d-inline"
                                           onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');">
@@ -103,7 +103,7 @@
 @endsection
 
 @push('scripts')
-    {{-- ✅ DataTables v2.3.2 --}}
+    {{--  DataTables v2.3.2 --}}
     <link rel="stylesheet" href="//cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="//cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
@@ -113,7 +113,14 @@
             document.addEventListener('DOMContentLoaded', function () {
                 // ✅ Khởi tạo DataTable khi có bài viết
                 new DataTable('#postTable', {
-                    pageLength: 3 
+                    pageLength: 3,
+                    language: { 
+                        "emptyTable": "Không có bài viết nào",
+                        "search": "Tìm kiếm:",
+                        "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                        "lengthMenu": "Hiển thị _MENU_ mục mỗi trang",
+                        "info": "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                    } 
                 });
 
                 // ✅ Xử lý xoá tất cả bài viết

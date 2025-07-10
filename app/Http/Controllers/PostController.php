@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PostRequest;
+use App\Http\Requests\PostRequest\StorePostRequest;
+use App\Http\Requests\PostRequest\UpdatePostRequest;
 use App\Models\Post;
 use App\Services\PostService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
@@ -18,18 +17,11 @@ class PostController extends Controller
         $this->middleware('can:delete,post')->only(['destroy']);
     }
 
-    /**
-     * Hiển thị danh sách bài viết.
-     * Sử dụng DataTables client-side => dùng get() thay vì paginate().
-     */
     public function index()
     {
-        $today = Carbon::now();
-
-        // Lấy toàn bộ bài viết đã đăng
-        $posts = Post::where('user_id', Auth::id()) // 👈 Chỉ lấy bài viết của user hiện tại
-            ->where('publish_date', '<=', $today)
-            ->orderBy('publish_date', 'desc')
+       // Lấy toàn bộ bài viết đã đăng
+        $posts = Post::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('posts.index', compact('posts'));
@@ -40,7 +32,7 @@ class PostController extends Controller
         return view('posts.create');
     }
 
-    public function store(PostRequest $request)
+    public function store(StorePostRequest $request)
     {
         try {
             $this->postService->store($request->validated(), $request);
@@ -57,7 +49,7 @@ class PostController extends Controller
         return view('posts.edit', compact('post'));
     }
 
-    public function update(PostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
         //$this->authorize('update', $post);
 
@@ -77,11 +69,14 @@ class PostController extends Controller
         return to_route('posts.index')->with('success', 'Xóa bài viết thành công');
     }
 
-
-
     public function destroyAll()
     {
         Post::where('user_id', Auth::id())->delete();
         return response()->json(['message' => 'Đã xoá tất cả bài viết']);
+    }
+
+    public function show(Post $post)
+    {
+        return view('posts.show', compact('post'));
     }
 }

@@ -34,7 +34,7 @@ Route::middleware('guest')->group(function () {
 
 
 // 2. Nhóm route sau khi login + kiểm tra trạng thái tài khoản
-Route::middleware(['auth', CheckAccountStatus::class])->group(function () {
+Route::middleware(['auth', 'check.account'])->group(function () {
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -49,6 +49,8 @@ Route::middleware(['auth', CheckAccountStatus::class])->group(function () {
     // Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     // Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     // Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    
 });
 
 
@@ -64,12 +66,3 @@ Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{post:slug}', [NewsController::class, 'show'])->name('news.show');
 
 
-// ==========================
-// 5. Admin area (chỉ admin được vào)
-// ==========================
-// Route::prefix('admin')
-//     ->middleware(['auth', 'is_admin'])
-//     ->name('admin.')
-//     ->group(function () {
-//         Route::resource('posts', AdminPostController::class);
-//     });

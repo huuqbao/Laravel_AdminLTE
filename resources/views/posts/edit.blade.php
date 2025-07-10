@@ -41,7 +41,7 @@
             @error('publish_date') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
-        @if (isset($post) && $post->user_id === auth()->id())
+        {{-- @if (isset($post) && $post->user_id === auth()->id())
             <div class="mb-3">
                 <label>Trạng thái <span class="text-danger">*</span></label>
                 <select name="status" class="form-control">
@@ -51,16 +51,18 @@
                 </select>
                 @error('status') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
-        @endif
+        @endif --}}
 
         <div class="mb-3">
-            <label>Hình đại diện</label>
+            <label>Hình đại diện <span class="text-danger">*</span></label>
             <input type="file" name="thumbnail" class="form-control">
             @if ($post->getFirstMediaUrl('thumbnail'))
                 <img src="{{ $post->getFirstMediaUrl('thumbnail') }}" width="80" class="mt-2 border rounded">
             @endif
+            @error('thumbnail')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
         </div>
-
 
         <button type="submit" class="btn btn-success">Cập nhật bài viết</button>
     </form>
