@@ -6,11 +6,11 @@ use App\Enums\UserStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class AuthService //kiem tra dang nhap
+class AuthService 
 {
     public function login(array $credentials): bool
     {
-        if (!Auth::attempt([ //kiem tra dang nhap thanh cong hay that bai
+        if (!Auth::attempt([ 
             'email' => $credentials['email'], 
             'password' => $credentials['password'],
         ])) {
@@ -20,7 +20,6 @@ class AuthService //kiem tra dang nhap
         }
         $user = Auth::user();
 
-        // Check status sau khi đăng nhập
         match ($user->status) {
             UserStatus::PENDING->value  => $this->failLogin('Tài khoản đang chờ phê duyệt.'),
             UserStatus::REJECTED->value => $this->failLogin('Tài khoản đã bị từ chối.'),
@@ -28,12 +27,12 @@ class AuthService //kiem tra dang nhap
             default => null,
         };
 
-        return true; // Đăng nhập hợp lệ
+        return true; 
     }
 
     protected function failLogin(string $message): never
     {
-        Auth::logout(); // Đăng xuất ngay lập tức nếu status không hợp lệ
+        Auth::logout(); 
         throw ValidationException::withMessages(['email' => $message]);
     }
 }

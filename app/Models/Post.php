@@ -9,7 +9,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use App\Enums\PostStatus;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\Observers\PostObserver;
 
+#[ObservedBy([PostObserver::class])]
 class Post extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, SoftDeletes;
@@ -62,11 +65,6 @@ class Post extends Model implements HasMedia
 
         return $slug;
     }
-
-    // public function getRouteKeyName()
-    // {
-    //     return 'slug';
-    // }
 
     // Accessors
     public function getStatusLabelAttribute()

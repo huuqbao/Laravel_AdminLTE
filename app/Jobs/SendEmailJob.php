@@ -17,18 +17,12 @@ class SendEmailJob implements ShouldQueue
     protected string $email;
     protected string $name;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(string $email, string $name)
     {
         $this->email = $email;
         $this->name = $name;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         Mail::to($this->email)->send(new DemoMail($this->name));

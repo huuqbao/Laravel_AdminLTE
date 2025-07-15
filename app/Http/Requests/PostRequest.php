@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 use App\Models\Post;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 /**
  * @property-read Post|null $post
  * @method bool hasFile(string $key)
@@ -30,9 +31,16 @@ class PostRequest extends FormRequest
             'description' => 'required|string|max:300',
             'content' => 'required|string',
             'publish_date' => 'required|date',
-            'status' => ['nullable', new Enum(PostStatus::class)],
+            'status' => [
+                'nullable',
+                Rule::in([
+                    PostStatus::NEW->value,
+                    PostStatus::UPDATED->value,
+                    PostStatus::PUBLISHED->value,
+                ]),
+            ],
             'thumbnail' => [
-                $isUpdate ? 'nullable' : 'required',
+                'required',
                 'image',
                 'mimes:jpeg,png,jpg,gif,svg',
                 'max:2048',

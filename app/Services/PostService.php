@@ -13,8 +13,10 @@ use Illuminate\Support\Str;
 
 class PostService
 {
-    public function store(array $validated, Request $request): Post
+    public function store(array $validated): Post
     {
+        $request = request();
+
         DB::beginTransaction();
 
         try {
@@ -33,7 +35,9 @@ class PostService
             $validated['publish_date'] = $request->filled('publish_date')
                 ? now()->parse($request->input('publish_date'))
                 : null;
-
+            
+            $validated['content'] = str_replace(['<p>', '</p>'], '', $request->input('content'));  
+                
             $post = Post::create($validated);
 
             if ($request->hasFile('thumbnail')) {
@@ -49,12 +53,16 @@ class PostService
         }
     }
 
-    public function update(Post $post, array $validated, Request $request): Post
+    public function update(Post $post, array $validated): Post
     {
+        $request = request();
+
         DB::beginTransaction();
 
         try {
             $updateData = $validated;
+
+            $updateData['content'] = str_replace(['<p>', '</p>'], '', $request->input('content'));
 
             $updateData['publish_date'] = $request->filled('publish_date')
                 ? now()->parse($request->input('publish_date'))

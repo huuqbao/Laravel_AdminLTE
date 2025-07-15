@@ -26,7 +26,7 @@
 
         <div class="mb-3">
             <label>Nội dung <span class="text-danger">*</span></label>
-            <textarea name="content" id="content" class="form-control" rows="10" style="resize: vertical;">{{ old('content', $post->content ?? '') }}</textarea>
+            <textarea name="content" id="editor" class="form-control">{{ old('content', $post->content ?? '') }}</textarea>
             @error('content') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
@@ -41,17 +41,18 @@
             @error('publish_date') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
-        {{-- @if (isset($post) && $post->user_id === auth()->id())
+        @if (auth()->user()?->role === \App\Enums\RoleStatus::ADMIN->value)
             <div class="mb-3">
                 <label>Trạng thái <span class="text-danger">*</span></label>
                 <select name="status" class="form-control">
-                    <option value="0" {{ $post->status == 0 ? 'selected' : '' }}>Bài viết mới</option>
-                    <option value="1" {{ $post->status == 1 ? 'selected' : '' }}>Được cập nhật</option>
-                    <option value="2" {{ $post->status == 2 ? 'selected' : '' }}>Đã xuất bản</option>   
+                    <option value="0" {{ $post->status->value == 0 ? 'selected' : '' }}>Bài viết mới</option>
+                    <option value="1" {{ $post->status->value == 1 ? 'selected' : '' }}>Được cập nhật</option>
+                    <option value="2" {{ $post->status->value == 2 ? 'selected' : '' }}>Đã xuất bản</option>   
                 </select>
                 @error('status') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
-        @endif --}}
+        @endif
+
 
         <div class="mb-3">
             <label>Hình đại diện <span class="text-danger">*</span></label>
@@ -70,13 +71,13 @@
 @endsection
 
 @push('scripts')
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <!-- CKEditor CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            $('.summernote').summernote({
-                height: 300
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .catch(error => {
+                console.error(error);
             });
-        });
     </script>
 @endpush

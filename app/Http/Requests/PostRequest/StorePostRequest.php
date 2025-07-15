@@ -33,15 +33,14 @@ class StorePostRequest extends FormRequest
             ],
         ];
 
-        // Nếu là admin thì mới cho phép submit status
-        if (Auth::check() && Auth::user()?->role === RoleStatus::ADMIN->value) {
+        if (Auth::check() && Auth::user()?->role === RoleStatus::ADMIN) {
             $rules['status'] = [
-                'required',
+                'nullable',
                 Rule::in([
                     PostStatus::NEW->value,
                     PostStatus::UPDATED->value,
                     PostStatus::PUBLISHED->value,
-                ]),
+                ]), 
             ];
         }
 

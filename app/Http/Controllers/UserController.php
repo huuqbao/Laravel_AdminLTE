@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProfileRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log; //compact user: tao mang voi bien user giup truyen bien user tu controller sang view
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
 

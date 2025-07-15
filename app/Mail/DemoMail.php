@@ -15,17 +15,11 @@ class DemoMail extends Mailable implements ShouldQueue
 
     public string $name;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct(string $name)
     {
         $this->name = $name;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -33,9 +27,6 @@ class DemoMail extends Mailable implements ShouldQueue
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(

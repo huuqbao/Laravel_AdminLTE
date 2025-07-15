@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminPostController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -8,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\NewsController;
 use App\Http\Middleware\CheckAccountStatus;
+
 
 // Trang chính
 Route::get('/', fn() => view('welcome'))->name('welcome');
@@ -35,11 +38,9 @@ Route::middleware('guest')->group(function () {
 
 // 2. Nhóm route sau khi login + kiểm tra trạng thái tài khoản
 Route::middleware(['auth', 'check.account'])->group(function () {
-    // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/posts/data', [PostController::class, 'getData'])->name('posts.data');
-    // Quản lý bài viết (của user)
     Route::delete('/posts/delete-all', [PostController::class, 'destroyAll'])->name('posts.destroyAll');
     
     Route::resource('posts', PostController::class);
@@ -63,5 +64,27 @@ Route::middleware('auth')->group(function () {
 // 4. Trang tin tức (ai cũng xem được)
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{post:slug}', [NewsController::class, 'show'])->name('news.show');
+
+//5. Admin
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'admin', 'check.account']) 
+    ->group(function () {
+
+        Route::get('/', function () {
+            return to_route('admin.users.index'); 
+        })->name('dashboard');
+
+        Route::get('posts/data', [AdminPostController::class, 'getData'])->name('posts.data');
+        Route::resource('posts', AdminPostController::class); 
+        Route::patch('posts/{post}/status', [AdminPostController::class, 'updateStatus'])->name('posts.updateStatus');
+        Route::delete('posts', [AdminPostController::class, 'destroyAll'])->name('posts.destroyAll');
+
+        Route::get('users/data', [AdminUserController::class, 'data'])->name('users.data');
+        Route::resource('users', AdminUserController::class)->only(['index', 'edit', 'update']);
+
+    });
+
+
 
 

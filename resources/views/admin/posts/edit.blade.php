@@ -8,7 +8,7 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <form action="{{ route('posts.update', $post) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.posts.update', $post) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -26,7 +26,7 @@
 
         <div class="mb-3">
             <label>Nội dung <span class="text-danger">*</span></label>
-            <textarea name="content" id="content" class="form-control summernote" rows="10">{{ old('content', $post->content ?? '') }}</textarea>
+            <textarea name="content" id="editor" class="form-control">{{ old('content', $post->content ?? '') }}</textarea>
             @error('content') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
@@ -41,20 +41,20 @@
             @error('publish_date') <div class="text-danger">{{ $message }}</div> @enderror
         </div>
 
-        @if (auth()->user()?->role === \App\Enums\RoleStatus::ADMIN->value)
+
+        @can('admin')
             <div class="mb-3">
-                <label>Trạng thái <span class="text-danger">*</span></label>
-                <select name="status" class="form-control">
+                <label for="status" class="form-label">Trạng thái</label>
+                <select class="form-select" id="status" name="status">
                     @foreach (\App\Enums\PostStatus::cases() as $status)
-                        <option value="{{ $status->value }}"
-                            {{ old('status', $post->status->value) == $status->value ? 'selected' : '' }}>
-                            {{ $status->name }}
+                        <option value="{{ $status->value }}" {{ $post->status === $status ? 'selected' : '' }}>
+                            {{ $status->label() }}
                         </option>
                     @endforeach
                 </select>
-                @error('status') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
-        @endif
+        @endcan
+
 
         <div class="mb-3">
             <label>Hình đại diện <span class="text-danger">*</span></label>
@@ -72,14 +72,15 @@
 </div>
 @endsection
 
+
 @push('scripts')
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <!-- CKEditor CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            $('.summernote').summernote({
-                height: 300
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .catch(error => {
+                console.error(error);
             });
-        });
     </script>
 @endpush

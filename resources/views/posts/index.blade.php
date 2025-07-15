@@ -5,30 +5,10 @@
 @section('content')
 <div class="container">
     <div class="row">
-        {{-- Menu bên trái --}}
         <div class="col-md-3 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <strong>Menu</strong>
-                </div>
-                <div class="list-group list-group-flush">
-                    <a href="{{ route('posts.index') }}"
-                       class="list-group-item list-group-item-action {{ request()->routeIs('posts.index') ? 'bg-success text-white' : '' }}">
-                        📄 Danh sách bài viết
-                    </a>
-                    <a href="{{ route('profile.edit') }}" class="list-group-item list-group-item-action">📝 Cập nhật hồ sơ</a>
-                    <a href="{{ route('news.index') }}" class="list-group-item list-group-item-action">📬 News</a>
-                    <a href="#" class="list-group-item list-group-item-action">👤 Thông tin cá nhân</a>
-                    <a href="#" class="list-group-item list-group-item-action">⚙️ Cài đặt</a>
-                    <a href="#" class="list-group-item list-group-item-action">🛒 Lịch sử mua hàng</a>
-                    <a href="#" class="list-group-item list-group-item-action">📊 Báo cáo hoạt động</a>
-                    <a href="#" class="list-group-item list-group-item-action">🔒 Đổi mật khẩu</a>
-                    <a href="#" class="list-group-item list-group-item-action">❓ Trợ giúp & Hỗ trợ</a>
-                </div>
-            </div>
+            @include('layouts.sidebar')
         </div>
 
-        {{-- Nội dung bên phải --}}
         <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h1 class="h4 mb-0">Danh sách bài viết</h1>
@@ -38,28 +18,28 @@
                 </div>
             </div>
 
-            {{-- Thông báo --}}
             @if(session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
                 </div>
             @endif
 
-            {{-- Bảng danh sách bài viết --}}
-            <div id="post-list">
-                <table id="postTable" class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Thumbnail</th>
-                            <th style="width: 20%;">Tiêu đề</th> 
-                            <th style="width: 40%;">Mô tả</th> 
-                            <th>Ngày đăng</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                </table>
+            <div class="card">
+                <div class="card-body">
+                    <table id="postTable" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Thumbnail</th>
+                                <th style="width: 20%;">Tiêu đề</th> 
+                                <th style="width: 40%;">Mô tả</th> 
+                                <th>Ngày đăng</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

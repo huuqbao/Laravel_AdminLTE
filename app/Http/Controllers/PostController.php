@@ -18,22 +18,14 @@ class PostController extends Controller
         $this->middleware('can:delete,post')->only(['destroy']);
     }
 
-    // public function index()
-    // {
-    //    // Lấy toàn bộ bài viết đã đăng
-    //     $posts = Post::where('user_id', Auth::id())
-    //         ->orderBy('created_at', 'desc')
-    //         ->get();
-
-    //     return view('posts.index', compact('posts'));
-    // }
     public function index()
     {
         return view('posts.index');
     }
 
-    public function getData(Request $request)
+    public function getData()
     {
+        $request = request();
         return response()->json($this->postService->getDatatablePosts($request));
     }
 
@@ -54,15 +46,12 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
-        //$this->authorize('update', $post);
-
+        $post->load('user'); 
         return view('posts.edit', compact('post'));
     }
 
     public function update(UpdatePostRequest $request, Post $post)
     {
-        //$this->authorize('update', $post);
-
         try {
             $this->postService->update($post, $request->validated(), $request);
             return to_route('posts.index')->with('success', 'Cập nhật bài viết thành công');
@@ -81,12 +70,15 @@ class PostController extends Controller
 
     public function destroyAll()
     {
-        Post::where('user_id', Auth::id())->delete();
+        Auth::user()->posts()->delete();
         return response()->json(['message' => 'Đã xoá tất cả bài viết']);
     }
 
     public function show(Post $post)
     {
+        $post->load('user');
+
         return view('posts.show', compact('post'));
     }
+
 }

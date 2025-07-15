@@ -20,7 +20,7 @@ use Exception;
 
 class AuthController extends Controller
 {
-    protected AuthService $authService;  //Khai báo một thuộc tính để lưu đối tượng AuthService
+    protected AuthService $authService;  
 
     public function __construct(AuthService $authService)
     {
@@ -32,7 +32,7 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(RegisterRequest $request)  //tham số truyền vào hàm là 1 đối tượng thuộc RegisterRequest
+    public function register(RegisterRequest $request) 
     {
         DB::beginTransaction();
 
@@ -73,6 +73,12 @@ class AuthController extends Controller
         try {
             $this->authService->login($request->validated());
 
+            $user =  Auth::user();
+
+            if ($user->role === \App\Enums\RoleStatus::ADMIN) {
+                return to_route('admin.posts.index')->with('success', 'Đăng nhập thành công với quyền Admin');
+            }
+
             return to_route('posts.index')->with('success', 'Đăng nhập thành công');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -84,8 +90,9 @@ class AuthController extends Controller
     }
 
 
-    public function logout(Request $request)
+    public function logout()
     {
+        $request = request();
         Auth::logout();
         $request->session()->invalidate(); //xoa du lieu
         $request->session()->regenerateToken(); // Tao token moi

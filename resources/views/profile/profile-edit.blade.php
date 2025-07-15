@@ -3,33 +3,10 @@
 @section('content')
 <div class="container mt-5">
     <div class="row">
-        {{-- Sidebar --}}
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <strong>Menu</strong>
-                </div>
-                <div class="list-group list-group-flush">
-                    <a href="{{ route('posts.index') }}"
-                        class="list-group-item list-group-item-action {{ request()->routeIs('posts.index') ? 'bg-success text-white' : '' }}">
-                        📄 Danh sách bài viết
-                    </a>
-                    <a href="{{ route('profile.edit') }}"
-                        class="list-group-item list-group-item-action {{ request()->routeIs('profile.edit') ? 'bg-success text-white' : '' }}">
-                        📝 Cập nhật hồ sơ
-                    </a>
-                    <a href="{{ route('news.index') }}" class="list-group-item list-group-item-action">📬 News</a>
-                    <a href="#" class="list-group-item list-group-item-action">👤 Thông tin cá nhân</a>
-                    <a href="#" class="list-group-item list-group-item-action">⚙️ Cài đặt</a>
-                    <a href="#" class="list-group-item list-group-item-action">🛒 Lịch sử mua hàng</a>
-                    <a href="#" class="list-group-item list-group-item-action">📊 Báo cáo hoạt động</a>
-                    <a href="#" class="list-group-item list-group-item-action">🔒 Đổi mật khẩu</a>
-                    <a href="#" class="list-group-item list-group-item-action">❓ Trợ giúp & Hỗ trợ</a>
-                </div>
-            </div>
+        <div class="col-md-3 mb-4">
+            @include('layouts.sidebar')
         </div>
 
-        {{-- Form cập nhật hồ sơ --}}
         <div class="col-md-9">
             <div class="card shadow p-4">
                 <h3 class="text-center mb-4 text-primary">Cập nhật hồ sơ</h3>
@@ -42,7 +19,6 @@
                     @csrf
                     @method('PATCH')
 
-                    {{-- Họ --}}
                     <div class="mb-3">
                         <label for="first_name" class="form-label">Họ <span class="text-danger">*</span></label>
                         <input type="text" name="first_name" id="first_name"
@@ -53,7 +29,6 @@
                         @enderror
                     </div>
 
-                    {{-- Tên --}}
                     <div class="mb-3">
                         <label for="last_name" class="form-label">Tên <span class="text-danger">*</span></label>
                         <input type="text" name="last_name" id="last_name"
@@ -64,7 +39,6 @@
                         @enderror
                     </div>
 
-                    {{-- Địa chỉ --}}
                     <div class="mb-3">
                         <label for="address" class="form-label">Địa chỉ </span></label>
                         <textarea name="address" id="address"
