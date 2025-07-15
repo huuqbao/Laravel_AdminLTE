@@ -37,7 +37,7 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         try {
-            $this->postService->store($request->validated(), $request);
+            $this->postService->store($request->validated());
             return to_route('posts.index')->with('success', 'Tạo bài viết thành công');
         } catch (\Throwable $e) {
             return back()->with('error', 'Đã xảy ra lỗi khi tạo bài viết: ' . $e->getMessage());
@@ -53,7 +53,7 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         try {
-            $this->postService->update($post, $request->validated(), $request);
+            $this->postService->update($post, $request->validated());
             return to_route('posts.index')->with('success', 'Cập nhật bài viết thành công');
         } catch (\Throwable $e) {
             return back()->with('error', 'Đã xảy ra lỗi khi cập nhật bài viết: ' . $e->getMessage());

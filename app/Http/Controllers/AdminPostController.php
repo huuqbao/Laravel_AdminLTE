@@ -34,7 +34,7 @@ class AdminPostController extends Controller
         $validated = $request->validated();
 
         try {
-            $this->adminpostService->update($post, $validated, $request);
+            $this->adminpostService->update($post, $validated);
             return to_route('admin.posts.index')->with('success', 'Cập nhật bài viết thành công');
         } catch (\Throwable $e) {
             return back()->with('error', 'Cập nhật bài viết thất bại');
@@ -57,7 +57,7 @@ class AdminPostController extends Controller
     public function store(StorePostRequest $request)
     {
         try {
-            $post = $this->adminpostService->store($request->validated(), $request);
+            $post = $this->adminpostService->store($request->validated());
             return to_route('admin.posts.index')->with('success', 'Tạo bài viết thành công');
         } catch (\Throwable $e) {
             return redirect()->back()->withInput()->withErrors('Lỗi khi tạo bài viết: ' . $e->getMessage());
@@ -66,7 +66,6 @@ class AdminPostController extends Controller
 
     public function show(Post $post)
     {
-        // Trả về view show, truyền dữ liệu $post
         return view('admin.posts.show', compact('post'));
     }
 
