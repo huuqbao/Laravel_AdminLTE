@@ -121,7 +121,7 @@
                 }
             });
 
-            // Event listener cho nút xóa từng bài viết (sử dụng event delegation)
+            // Event listener cho nút xóa từng bài viết 
             $('#postTable tbody').on('click', '.delete-post-btn', function (e) {
                 e.preventDefault();
                 
@@ -147,8 +147,6 @@
                 })
                 .then(data => {
                     alert(data.message || 'Đã xoá bài viết thành công.');
-                    // Tải lại dữ liệu của DataTable mà không reload trang
-                    // Tham số thứ 2 'false' giúp giữ nguyên trang hiện tại sau khi reload
                     table.ajax.reload(null, false); 
                 })
                 .catch(error => {
