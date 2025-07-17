@@ -75,7 +75,7 @@ class AuthController extends Controller
 
             $user =  Auth::user();
 
-            if ($user->role === \App\Enums\RoleStatus::ADMIN) {
+            if ($user->role === RoleStatus::ADMIN) {
                 return to_route('admin.posts.index')->with('success', 'Đăng nhập thành công với quyền Admin');
             }
 

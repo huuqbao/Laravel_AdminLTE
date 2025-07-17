@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-
+    
 class PostService
 {
     public function store(array $validated): Post
@@ -22,15 +22,7 @@ class PostService
         try {
             $validated['user_id'] = Auth::id();
 
-            // Nếu là admin thì được phép chọn status
-            if (Auth::check() && Auth::user()?->role === RoleStatus::ADMIN->value) {
-                $validated['status'] = PostStatus::from(
-                    $validated['status'] ?? PostStatus::NEW->value
-                );
-            } else {
-                // Không phải admin thì luôn là NEW
-                $validated['status'] = PostStatus::NEW;
-            }
+            $validated['status'] = PostStatus::NEW;
 
             $validated['publish_date'] = $request->filled('publish_date')
                 ? now()->parse($request->input('publish_date'))
@@ -68,17 +60,7 @@ class PostService
                 ? now()->parse($request->input('publish_date'))
                 : null;
 
-            if (Auth::check() && Auth::user()?->role === RoleStatus::ADMIN->value) {
-                $updateData['status'] = PostStatus::from(
-                    $validated['status'] ?? $post->status->value
-                );
-            } else {
-                unset($updateData['status']);
-            }
-
-            if (isset($updateData['title']) && $updateData['title'] !== $post->title) {
-                $updateData['slug'] = null;
-            }
+            unset($updateData['status']);
 
             $post->update($updateData);
 
@@ -106,10 +88,10 @@ class PostService
                 ->orWhere('description', 'like', "%{$search}%");
             });
         }
-
         $total = $query->count();
+
         $start = (int) $request->input('start', 0);
-        $length = (int) $request->input('length', 10);
+        $length = (int) $request->input('length', 3);
 
         $columns = ['id', 'thumbnail', 'title', 'description', 'publish_date', 'status']; 
         $order = $request->input('order.0', ['column' => 0, 'dir' => 'desc']);
@@ -141,5 +123,14 @@ class PostService
         ];
     }
 
+    public function destroy(Post $post): void
+    {
+        $post->delete();
+    }
+
+    public function destroyAllByUser(): void
+    {
+        Auth::user()->posts()->delete();
+    }
 
 }

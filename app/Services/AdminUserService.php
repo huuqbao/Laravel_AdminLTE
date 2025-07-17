@@ -48,6 +48,7 @@ class AdminUserService
             'draw' => (int) $request->input('draw'),
             'recordsTotal' => $total,
             'recordsFiltered' => $total,
+            'totalUsers' => User::count(),
             'data' => $data->toArray(),
         ];
     }

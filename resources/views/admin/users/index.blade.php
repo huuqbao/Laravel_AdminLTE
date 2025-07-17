@@ -22,6 +22,9 @@
 
             <div class="card">
                 <div class="card-body">
+                    <div class="mb-2 text-end">
+                        <span class="badge bg-info text-white px-3 py-2" id="total-users">Tổng số người dùng: ...</span>
+                    </div>
                     <table id="usersTable" class="table table-bordered table-striped" style="width:100%">
                         <thead>
                             <tr>
@@ -52,7 +55,13 @@
             new DataTable('#usersTable', {
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.users.data') }}',
+                ajax: {
+                    url: '{{ route('admin.users.data') }}',
+                    dataSrc: function (json) {
+                        document.getElementById('total-users').textContent = 'Tổng số người dùng: ' + json.totalUsers;
+                        return json.data;
+                    }
+                },
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'id', name: 'id' }, 

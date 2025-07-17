@@ -19,25 +19,22 @@ class PostObserver
         }
     }
 
-
     protected function setUniqueSlug(Post $post): void
     {
         $baseSlug = Str::slug($post->title);
-
-        // Nếu slug trống thì đặt mặc định từ title
-        $slug = $post->slug ?: $baseSlug;
-
-        $originalSlug = $slug;
-        $i = 1;
+        $slug = $baseSlug;
+        $count = 1;
 
         while (
             Post::where('slug', $slug)
                 ->when($post->exists, fn ($query) => $query->where('id', '!=', $post->id))
                 ->exists()
         ) {
-            $slug = $originalSlug . '-' . $i++;
+            $slug = "{$baseSlug}-{$count}";
+            $count++;
         }
 
         $post->slug = $slug;
     }
+
 }

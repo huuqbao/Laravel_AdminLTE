@@ -52,20 +52,6 @@ class Post extends Model implements HasMedia
         return $query->where('status', PostStatus::PUBLISHED);
     }
 
-    public static function createUniqueSlug($title)
-    {
-        $slug = Str::slug($title);
-        $originalSlug = $slug;
-        $count = 0;
-
-        while (self::withTrashed()->where('slug', $slug)->exists()) {
-            $count++;
-            $slug = $originalSlug . '-' . $count;
-        }
-
-        return $slug;
-    }
-
     // Accessors
     public function getStatusLabelAttribute()
     {

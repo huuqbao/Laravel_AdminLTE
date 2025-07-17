@@ -62,6 +62,7 @@ class AdminPostService
             'recordsTotal' => $total,
             'recordsFiltered' => $total,
             'data' => $data,
+            'totalPosts' => Post::count(), 
         ];
     }
 
@@ -139,13 +140,11 @@ class AdminPostService
         try {
             $validated['user_id'] = Auth::id();
 
-            // Nếu là admin thì được phép chọn status
             if (Auth::check() && Auth::user()?->role === RoleStatus::ADMIN->value) {
                 $validated['status'] = PostStatus::from(
                     $validated['status'] ?? PostStatus::NEW->value
                 );
             } else {
-                // Không phải admin thì luôn là NEW
                 $validated['status'] = PostStatus::NEW;
             }
 

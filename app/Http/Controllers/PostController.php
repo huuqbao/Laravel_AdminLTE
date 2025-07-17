@@ -62,16 +62,28 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        //$this->authorize('delete', $post);
+        try {
+            $this->postService->destroy($post);
+            $request = request();
 
-        $post->delete();
-        return to_route('posts.index')->with('success', 'Xóa bài viết thành công');
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Xóa bài viết thành công']);
+            }
+
+            return to_route('posts.index')->with('success', 'Xóa bài viết thành công');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Lỗi khi xóa bài viết: ' . $e->getMessage());
+        }
     }
 
     public function destroyAll()
     {
-        Auth::user()->posts()->delete();
-        return response()->json(['message' => 'Đã xoá tất cả bài viết']);
+        try {
+            $this->postService->destroyAllByUser();
+            return response()->json(['message' => 'Đã xoá tất cả bài viết']);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Xóa thất bại: ' . $e->getMessage()], 500);
+        }
     }
 
     public function show(Post $post)

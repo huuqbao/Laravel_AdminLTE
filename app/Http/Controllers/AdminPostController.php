@@ -45,7 +45,12 @@ class AdminPostController extends Controller
     public function destroy(Post $post)
     {
         $this->adminpostService->deletePost($post);
-        return response()->json(['success' => true]);
+        $request = request();
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Xóa bài viết thành công.']);
+        }
+
+        return to_route('admin.posts.index')->with('success', 'Xóa bài viết thành công');
     }
 
     public function destroyAll()

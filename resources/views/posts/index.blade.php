@@ -52,13 +52,14 @@
     <script src="//cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            new DataTable('#postTable', {
+        $(document).ready(function () {
+            // Khởi tạo DataTable
+            var table = new DataTable('#postTable', {
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('posts.data') }}',
                 columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false }, 
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                     {
                         data: 'thumbnail',
                         name: 'thumbnail',
@@ -68,25 +69,21 @@
                             return data ? `<img src="${data}" width="60">` : '';
                         }
                     },
-                    { data: 'title', name: 'title', searchable: true },
-                    { data: 'description', name: 'description', searchable: true },
+                    { data: 'title', name: 'title' },
+                    { data: 'description', name: 'description' },
                     {
                         data: 'publish_date',
                         name: 'publish_date',
-                        searchable: true,
                         render: function (data) {
                             if (!data) return '';
                             const date = new Date(data);
                             return date.toLocaleString('vi-VN', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
+                                day: '2-digit', month: '2-digit', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
                             });
                         }
                     },
-                    { data: 'status', name: 'status', searchable: true },
+                    { data: 'status', name: 'status' },
                     {
                         data: 'id',
                         name: 'action',
@@ -95,19 +92,17 @@
                         render: function (id) {
                             let showUrl = `/posts/${id}`;
                             let editUrl = `/posts/${id}/edit`;
+                            // URL để gửi yêu cầu DELETE
                             let deleteUrl = `/posts/${id}`;
 
                             return `
                                 <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
                                     <a href="${showUrl}" class="btn btn-info text-white" title="Xem bài viết">👁</a>
-                                    <a href="${editUrl}" class="btn btn-warning text-dark" title="Sửa bài viết">✏️</a>
-                                    <form action="${deleteUrl}" method="POST"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');"
-                                        style="display:inline;">
-                                        <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="btn btn-danger text-white" title="Xoá bài viết">🗑</button>
-                                    </form>
+                                    <a href="${editUrl}" class="btn btn-warning text-dark" title="Sửa bài viết">✏️</a>                                    
+                                    <button type="button" class="btn btn-danger text-white delete-post-btn" 
+                                            data-url="${deleteUrl}" title="Xoá bài viết">
+                                        🗑
+                                    </button>
                                 </div>
                             `;
                         }
@@ -115,7 +110,6 @@
                 ],
                 order: [[0, 'desc']],
                 pageLength: 3,
-                //pagingType: "full_numbers",
                 language: {
                     "emptyTable": "Không có bài viết nào",
                     "search": "Tìm kiếm:",
@@ -126,33 +120,67 @@
                     "infoFiltered": "(được lọc từ tổng số _MAX_ mục)",
                 }
             });
-        });
 
-        document.getElementById('delete-all-btn').addEventListener('click', function (e) {
-            e.preventDefault();
+            // Event listener cho nút xóa từng bài viết (sử dụng event delegation)
+            $('#postTable tbody').on('click', '.delete-post-btn', function (e) {
+                e.preventDefault();
+                
+                // Lấy URL từ thuộc tính data-url của nút được click
+                const deleteUrl = $(this).data('url');
 
-            if (!confirm('Bạn có chắc chắn muốn xoá tất cả bài viết?')) return;
-
-            fetch("{{ route('posts.destroyAll') }}", {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json',
+                if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
+                    return;
                 }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Xoá thất bại');
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message || 'Đã xoá tất cả bài viết');
-                $('#postTable').DataTable().ajax.reload(); 
-            })
-            .catch(error => {
-                alert('Lỗi khi xoá bài viết');
-                console.error(error);
+
+                fetch(deleteUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Xóa thất bại. Vui lòng thử lại.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || 'Đã xoá bài viết thành công.');
+                    // Tải lại dữ liệu của DataTable mà không reload trang
+                    // Tham số thứ 2 'false' giúp giữ nguyên trang hiện tại sau khi reload
+                    table.ajax.reload(null, false); 
+                })
+                .catch(error => {
+                    alert('Lỗi khi xoá bài viết!');
+                    console.error(error);
+                });
+            });
+
+            // Xoa tat ca
+            document.getElementById('delete-all-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (!confirm('Bạn có chắc chắn muốn xoá tất cả bài viết?')) return;
+                fetch("{{ route('posts.destroyAll') }}", {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Xoá thất bại');
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || 'Đã xoá tất cả bài viết');
+                    table.ajax.reload(); 
+                })
+                .catch(error => {
+                    alert('Lỗi khi xoá bài viết');
+                    console.error(error);
+                });
             });
         });
     </script>
-
 @endpush
