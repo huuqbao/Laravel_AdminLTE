@@ -171,7 +171,6 @@
                 e.preventDefault();
                 if (!confirm('Bạn có chắc chắn muốn xoá tất cả bài viết?')) return;
 
-                // SỬA LẠI ROUTE CHO ĐÚNG
                 fetch("{{ route('admin.posts.destroyAll') }}", {
                     method: 'DELETE',
                     headers: {
