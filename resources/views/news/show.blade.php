@@ -19,7 +19,7 @@
             </p>
 
             <div class="article-content" style="line-height: 1.8; font-size: 1.05rem;">
-                {!! nl2br(e($post->content)) !!}
+                <div>{!! $post->content !!}</div>
             </div>
 
         </div>

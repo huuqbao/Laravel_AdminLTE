@@ -14,7 +14,17 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h1 class="h4 mb-0">Danh sách bài viết</h1>
                 <div>
-                    <a href="#" id="delete-all-btn" class="btn btn-danger">🗑 Xoá tất cả</a>
+                    <a href="#" id="delete-all-btn" class="btn btn-danger">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-trash me-1" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <line x1="4" y1="7" x2="20" y2="7" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                            <path d="M9 7v-3h6v3" />
+                        </svg>
+                        Xoá tất cả
+                    </a>
                 </div>
             </div>
 
@@ -23,6 +33,24 @@
                     {{ session('success') }}
                 </div>
             @endif
+            
+            {{-- Tìm kiếm & lọc --}}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" id="customSearch" class="form-control" placeholder="Tìm tiêu đề hoặc mô tả...">
+                </div>
+                <div class="col-md-4">
+                    <select id="statusFilter" class="form-select">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        @foreach(\App\Enums\PostStatus::cases() as $status)
+                            <option value="{{ $status->value }}">{{ $status->label() }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button id="filterBtn" class="btn btn-secondary w-100">Lọc</button>
+                </div>
+            </div>
 
             <div class="card">
                 <div class="card-body">
@@ -33,7 +61,7 @@
                         <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>User_Id</th>
+                                <th>Người dùng</th>
                                 <th>Thumbnail</th>
                                 <th style="width: 20%;">Tiêu đề</th> 
                                 <th style="width: 40%;">Mô tả</th> 
@@ -61,8 +89,13 @@
             var table = new DataTable('#postTable', {
                 processing: true,
                 serverSide: true,
+                searching: false,
                 ajax: {
-                    url: '{{ route('admin.posts.data') }}',
+                    url: '{{ route('admin.posts.index') }}',
+                    data: function (d) {
+                        d.custom_search = $('#customSearch').val();
+                        d.status = $('#statusFilter').val();
+                    },
                     dataSrc: function (json) {
                         $('#total-posts').text('Tổng số bài viết: ' + json.totalPosts);
                         return json.data;
@@ -70,7 +103,7 @@
                 },
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'user_id', name: 'user_id' },
+                    { data: 'user_name', name: 'user_name' },
                     {
                         data: 'thumbnail',
                         name: 'thumbnail',
@@ -84,15 +117,7 @@
                     { data: 'description', name: 'description' },
                     {
                         data: 'publish_date',
-                        name: 'publish_date',
-                        render: function (data) {
-                            if (!data) return '';
-                            const date = new Date(data);
-                            return date.toLocaleString('vi-VN', {
-                                day: '2-digit', month: '2-digit', year: 'numeric',
-                                hour: '2-digit', minute: '2-digit'
-                            });
-                        }
+                        name: 'publish_date'
                     },
                     { data: 'status', name: 'status' },
                     {
@@ -107,14 +132,35 @@
 
                             return `
                                 <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
-                                    <a href="${showUrl}" class="btn btn-info text-white" title="Xem bài viết">👁</a>
-                                    <a href="${editUrl}" class="btn btn-warning text-dark" title="Sửa bài viết">✏️</a>
-                                    
+                                    <a href="${showUrl}" class="btn btn-info text-white" title="Xem bài viết">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                            <circle cx="12" cy="12" r="2" />
+                                            <path d="M22 12c0 0-4 -8 -10 -8s-10 8 -10 8s4 8 10 8s10 -8 10 -8" />
+                                        </svg>
+                                    </a>
+
+                                    <a href="${editUrl}" class="btn btn-warning text-dark" title="Sửa bài viết">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                            <path d="M15 5l4 4l-11 11h-4v-4z" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3l-1.5 1.5l-4 -4l1.5 -1.5z" />
+                                        </svg>
+                                    </a>
+
                                     <button type="button" class="btn btn-danger text-white delete-post-btn"
                                             data-url="${deleteUrl}" title="Xoá bài viết">
-                                        🗑
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-trash" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                            <line x1="4" y1="7" x2="20" y2="7" />
+                                            <line x1="10" y1="11" x2="10" y2="17" />
+                                            <line x1="14" y1="11" x2="14" y2="17" />
+                                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                            <path d="M9 7v-3h6v3" />
+                                        </svg>
                                     </button>
                                 </div>
+
                             `;
                         }
                     }
@@ -164,7 +210,8 @@
                     console.error(error);
                 });
             });
-
+            // Reload khi lọc
+            $('#filterBtn').on('click', () => table.ajax.reload());
 
             // Xử lý nút "Xóa tất cả"
             document.getElementById('delete-all-btn').addEventListener('click', function (e) {

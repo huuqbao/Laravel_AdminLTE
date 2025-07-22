@@ -17,6 +17,8 @@ use App\Enums\RoleStatus;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
 use Exception;
+use App\Jobs\SendEmailJobRegister;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -32,33 +34,15 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(RegisterRequest $request) 
+    public function register(RegisterRequest $request)
     {
-        DB::beginTransaction();
-
         try {
-            $validated = $request->validated();
-
-            $user = User::create([
-                'first_name' => $validated['first_name'],
-                'last_name'  => $validated['last_name'],
-                'email'      => $validated['email'],
-                'password'   => Hash::make($validated['password']),
-                'status'     => UserStatus::PENDING->value,
-                'role'       => RoleStatus::USER->value,
-            ]);
-
-            Mail::to($user->email)->queue(new WelcomeMail($user));
-
-            DB::commit();
+            $this->authService->register($request->validated());
 
             return to_route('login.form')->with('success', 'Đăng ký tài khoản thành công');
-
         } catch (QueryException $e) {
-            DB::rollBack(); // rollback khi lỗi SQL
             return back()->withErrors(['email' => 'Email đã tồn tại hoặc lỗi hệ thống.'])->withInput();
-        } catch (Exception $e) {
-            DB::rollBack(); // rollback khi lỗi khác
+        } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Đã xảy ra lỗi, vui lòng thử lại.'])->withInput();
         }
     }
@@ -81,7 +65,7 @@ class AuthController extends Controller
 
             return to_route('posts.index')->with('success', 'Đăng nhập thành công');
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
             
         } catch (\Exception $e) {
@@ -90,13 +74,10 @@ class AuthController extends Controller
     }
 
 
-    public function logout()
+    public function logout(Request $request)
     {
-        $request = request();
-        Auth::logout();
-        $request->session()->invalidate(); //xoa du lieu
-        $request->session()->regenerateToken(); // Tao token moi
-
+        $this->authService->logout();
         return to_route('login.form');
     }
+
 }

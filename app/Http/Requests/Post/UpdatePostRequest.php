@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\PostRequest;
+namespace App\Http\Requests\Post;
 
 use App\Enums\PostStatus;
 use App\Enums\RoleStatus;

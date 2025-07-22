@@ -8,14 +8,13 @@ use App\Enums\RoleStatus;
 
 class AdminMiddleware
 {
-    public function handle($request, Closure $next, $role = 'admin')
+    public function handle($request, Closure $next)
     {
-        $roleEnum = RoleStatus::tryFrom($role); // Chuyển string thành Enum
-
-        if (Auth::check() && Auth::user()->role === $roleEnum) {
+        if (Auth::check() && Auth::user()->role === RoleStatus::ADMIN) {
             return $next($request);
         }
 
         abort(403, 'Bạn không có quyền truy cập');
     }
+
 }

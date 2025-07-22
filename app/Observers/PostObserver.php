@@ -3,38 +3,29 @@
 namespace App\Observers;
 
 use App\Models\Post;
-use Illuminate\Support\Str;
 
 class PostObserver
 {
-    public function creating(Post $post)
+    public function creating(Post $post): void
     {
-        $this->setUniqueSlug($post);
+        // Slug sẽ được set sau khi post được tạo, nên để trống
+        $post->slug = '';
     }
 
-    public function updating(Post $post)
+    public function created(Post $post): void
     {
+        // Sau khi có ID, mới hash ID làm slug
+        if (empty($post->slug)) {
+            $post->slug = base_convert($post->id, 10, 36);
+            $post->saveQuietly(); // Không kích hoạt lại created()
+        }
+    }
+
+    public function updating(Post $post): void
+    {
+        // Nếu muốn thay đổi slug khi đổi title
         if ($post->isDirty('title')) {
-            $this->setUniqueSlug($post);
+            $post->slug = base_convert($post->id, 10, 36);
         }
     }
-
-    protected function setUniqueSlug(Post $post): void
-    {
-        $baseSlug = Str::slug($post->title);
-        $slug = $baseSlug;
-        $count = 1;
-
-        while (
-            Post::where('slug', $slug)
-                ->when($post->exists, fn ($query) => $query->where('id', '!=', $post->id))
-                ->exists()
-        ) {
-            $slug = "{$baseSlug}-{$count}";
-            $count++;
-        }
-
-        $post->slug = $slug;
-    }
-
 }

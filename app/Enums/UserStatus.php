@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Enums;
-//full hoa
+
 enum UserStatus: int
 {
     case PENDING = 0;

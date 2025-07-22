@@ -61,4 +61,10 @@ class User extends Authenticatable
             UserStatus::LOCKED => 'badge bg-warning text-dark',
         };
     }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim("{$this->last_name} {$this->first_name}") ?: $this->email;
+    }
+    
 }

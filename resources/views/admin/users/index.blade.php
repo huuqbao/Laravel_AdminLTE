@@ -56,7 +56,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.users.data') }}',
+                    url: '{{ route("admin.users.index") }}',
                     dataSrc: function (json) {
                         document.getElementById('total-users').textContent = 'Tổng số người dùng: ' + json.totalUsers;
                         return json.data;
@@ -78,8 +78,15 @@
                             let editUrl = '{{ route("admin.users.edit", ":id") }}'.replace(':id', id);
                             
                             return `
-                                <a href="${editUrl}" class="btn btn-sm btn-warning text-dark" title="Sửa tài khoản">✏️ Sửa</a>
+                                <a href="${editUrl}" class="btn btn-sm btn-warning text-dark d-inline-flex align-items-center" title="Sửa tài khoản" style="gap: 4px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-pencil" viewBox="0 0 16 16">
+                                        <path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-10 10A.5.5 0 0 1 4.5 14H2a1 1 0 0 1-1-1v-2.5a.5.5 0 0 1 .146-.354l10-10zM11.207 2L13 3.793 12.207 4.5 10.5 2.793 11.207 2zM3 13h1.5a.5.5 0 0 0 .354-.146L13 4.707 11.293 3 3 11.293V13z"/>
+                                    </svg>
+                                    Sửa
+                                </a>
                             `;
+
                         }
                     }
                 ],

@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PostRequest\StorePostRequest;
-use App\Http\Requests\PostRequest\UpdatePostRequest;
+use App\Http\Requests\Post\StorePostRequest;
+use App\Http\Requests\Post\UpdatePostRequest;
 use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+
 
 class PostController extends Controller
 {
@@ -18,31 +19,45 @@ class PostController extends Controller
         $this->middleware('can:delete,post')->only(['destroy']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return view('posts.index');
-    }
+        if ($request->ajax()) {
+            $filters = [
+                'custom_search' => $request->input('custom_search'),
+                'status' => $request->input('status'),
+                'start' => (int) $request->input('start', 0),
+                'length' => (int) $request->input('length', 3),
+                'draw' => (int) $request->input('draw'),
+                'order' => $request->input('order.0', ['column' => 0, 'dir' => 'desc']),
+            ];
 
-    public function getData()
-    {
-        $request = request();
-        return response()->json($this->postService->getDatatablePosts($request));
+            return response()->json($this->postService->getDatatablePosts($filters));
+        }
+
+        return view('posts.index');
     }
 
     public function create()
     {
         return view('posts.create');
     }
-
+    
     public function store(StorePostRequest $request)
     {
         try {
-            $this->postService->store($request->validated());
+            $post = $this->postService->store($request->validated());
+
+           /** @var \Illuminate\Http\Request $request */
+            if ($request->hasFile('thumbnail')) {
+                $post->addMediaFromRequest('thumbnail')->toMediaCollection('thumbnail');
+            }
+
             return to_route('posts.index')->with('success', 'Tạo bài viết thành công');
         } catch (\Throwable $e) {
             return back()->with('error', 'Đã xảy ra lỗi khi tạo bài viết: ' . $e->getMessage());
         }
     }
+
 
     public function edit(Post $post)
     {
@@ -54,17 +69,24 @@ class PostController extends Controller
     {
         try {
             $this->postService->update($post, $request->validated());
+
+            /** @var \Illuminate\Http\Request $request */
+            if ($request->hasFile('thumbnail')) {
+                $post->clearMediaCollection('thumbnail');
+                $post->addMediaFromRequest('thumbnail')->toMediaCollection('thumbnail');
+            }
+
             return to_route('posts.index')->with('success', 'Cập nhật bài viết thành công');
         } catch (\Throwable $e) {
             return back()->with('error', 'Đã xảy ra lỗi khi cập nhật bài viết: ' . $e->getMessage());
         }
     }
 
-    public function destroy(Post $post)
+
+    public function destroy(Post $post, Request $request)
     {
         try {
             $this->postService->destroy($post);
-            $request = request();
 
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Xóa bài viết thành công']);

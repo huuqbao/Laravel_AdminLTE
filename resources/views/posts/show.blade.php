@@ -22,7 +22,7 @@
     <hr>
         <div>
             <p><strong>Nội dung:</strong>
-            {!! nl2br(e($post->content)) !!}
+            <div>{{ $post->content }}</div>
         </div>
     <hr>
     <p><strong>Trạng thái:</strong> <span class="{{ $post->status->badgeClass() }}">{{ $post->status->label() }}</span></p>

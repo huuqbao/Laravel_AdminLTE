@@ -13,6 +13,7 @@
                class="list-group-item list-group-item-action {{ request()->routeIs('admin.users.*') ? 'bg-success text-white' : '' }}">
                 👥 Quản lý người dùng
             </a>
+            <a href="{{ route('news.index') }}" class="list-group-item list-group-item-action">📬 News</a>
         </div>
     </div>
 @endcan

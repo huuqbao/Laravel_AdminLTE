@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AdminPostController;
+use App\Http\Controllers\Admin\PostController as AdminPostController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -17,7 +17,7 @@ Route::get('/', fn() => view('welcome'))->name('welcome');
 
 // Trang chủ sau đăng nhập
 Route::get('/home', fn() => view('home'))
-    ->middleware(['auth', CheckAccountStatus::class])
+    ->middleware(['auth', 'check.account', 'can:user']) 
     ->name('home');
 
 // 1. Nhóm route cho khách (chưa login)
@@ -37,9 +37,7 @@ Route::middleware('guest')->group(function () {
 
 
 // 2. Nhóm route sau khi login + kiểm tra trạng thái tài khoản
-Route::middleware(['auth', 'check.account'])->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
+Route::middleware(['auth', 'check.account', 'can:user'])->group(function () {
     Route::get('/posts/data', [PostController::class, 'getData'])->name('posts.data');
     Route::delete('/posts/delete-all', [PostController::class, 'destroyAll'])->name('posts.destroyAll');
     
@@ -71,20 +69,26 @@ Route::prefix('admin')
     ->middleware(['auth', 'admin', 'check.account']) 
     ->group(function () {
 
-        Route::get('/', function () {
-            return to_route('admin.users.index'); 
-        })->name('dashboard');
+        Route::get('/', fn() => to_route('admin.users.index'))->name('dashboard');
 
-        Route::get('posts/data', [AdminPostController::class, 'getData'])->name('posts.data');
-        Route::resource('posts', AdminPostController::class); 
-        Route::patch('posts/{post}/status', [AdminPostController::class, 'updateStatus'])->name('posts.updateStatus');
-        Route::delete('posts', [AdminPostController::class, 'destroyAll'])->name('posts.destroyAll');
+        // Nhóm route quản lý bài viết
+        Route::prefix('posts')->name('posts.')->group(function () {
+            Route::get('data', [AdminPostController::class, 'getData'])->name('data');
+            Route::patch('{post}/status', [AdminPostController::class, 'updateStatus'])->name('updateStatus');
+            Route::delete('/', [AdminPostController::class, 'destroyAll'])->name('destroyAll');
+            Route::resource('/', AdminPostController::class)->parameters(['' => 'post']);
+        });
 
-        Route::get('users/data', [AdminUserController::class, 'data'])->name('users.data');
-        Route::resource('users', AdminUserController::class)->only(['index', 'edit', 'update']);
-
+        // Nhóm route quản lý người dùng
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('data', [AdminUserController::class, 'data'])->name('data');
+            Route::resource('/', AdminUserController::class)->only(['index', 'edit', 'update'])->parameters(['' => 'user']);
+        });
     });
 
+
+// 6. Đăng xuất 
+Route::middleware(['auth', 'check.account'])->post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 

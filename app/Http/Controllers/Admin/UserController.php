@@ -1,27 +1,33 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\AdminUserService;
+use App\Services\Admin\UserService;
 use Illuminate\Http\Request;
 use App\Enums\UserStatus;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Validation\Rule;
 
-class AdminUserController extends Controller
+class UserController extends Controller
 {
-    public function __construct(protected AdminUserService $userService) {}
+    public function __construct(protected UserService $userService) {}
 
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $filters = [
+                'search' => $request->input('search.value'),
+                'start' => (int) $request->input('start', 0),
+                'length' => (int) $request->input('length', 10),
+                'draw' => (int) $request->input('draw'),
+            ];
+
+            return response()->json($this->userService->getDatatableUsers($filters));
+        }
+
         return view('admin.users.index');
-    }
-
-    public function data(Request $request)
-    {
-        return response()->json($this->userService->getDatatableUsers($request));
     }
 
     public function edit(User $user)

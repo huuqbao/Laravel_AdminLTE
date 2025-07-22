@@ -7,9 +7,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
+    public function __construct(protected UserService $userService) {}
+
     public function edit()
     {
         $user = Auth::user();
@@ -19,16 +22,10 @@ class UserController extends Controller
     public function update(UpdateProfileRequest $request)
     {
         try {
-            DB::beginTransaction();
-
-            $user = Auth::user();
-            $user->update($request->validated());
-
-            DB::commit();
+            $this->userService->updateProfile($request->validated());
 
             return to_route('profile.edit')->with('success', 'Cập nhật hồ sơ thành công.');
-        } catch (Exception $e) {
-            DB::rollBack();
+        } catch (\Exception $e) {
             Log::error('Lỗi khi cập nhật hồ sơ: ' . $e->getMessage());
 
             return to_route('profile.edit')

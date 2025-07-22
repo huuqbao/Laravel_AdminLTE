@@ -6,6 +6,7 @@ use App\Enums\UserStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -31,7 +32,7 @@ class UpdateUserRequest extends FormRequest
             'first_name' => 'required|string|max:30',
             'last_name' => 'required|string|max:30',
             'address' => 'nullable|string|max:255',
-            'status' => ['required', Rule::in(array_column(UserStatus::cases(), 'value'))],
+            'status' => ['required', new Enum(UserStatus::class)],
             'email' => [
                 'required',
                 'string',

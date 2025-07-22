@@ -3,20 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use App\Enums\PostStatus;
-use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
+use App\Services\NewsService;
 
 class NewsController extends Controller
 {
-    public function index()
+    protected NewsService $newsService;
+
+    public function __construct(NewsService $newsService)
     {
-        $request = request();
-        $today = now();
-        $posts = Post::where('status', PostStatus::PUBLISHED)
-                    ->where('publish_date', '<=', $today)
-                    ->orderByDesc('publish_date')
-                    ->paginate(3);
+        $this->newsService = $newsService;
+    }
+
+    public function index(Request $request)
+    {
+        $posts = $this->newsService->getPublishedPostsPaginated();
 
         if ($request->ajax()) {
             return view('news.partials', compact('posts'))->render();
@@ -27,7 +28,7 @@ class NewsController extends Controller
 
     public function show(Post $post)
     {
-        abort_unless($post->status === PostStatus::PUBLISHED, 404);
+        abort_unless($this->newsService->isPostVisible($post), 404);
 
         return view('news.show', compact('post'));
     }

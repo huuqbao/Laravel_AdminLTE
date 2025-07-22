@@ -36,22 +36,6 @@ class Post extends Model implements HasMedia
         return $this->getFirstMediaUrl('thumbnail');
     }
 
-    // Scopes (dùng enum thay vì số)
-    public function scopeNew($query)
-    {
-        return $query->where('status', PostStatus::NEW);
-    }
-
-    public function scopeUpdated($query)
-    {
-        return $query->where('status', PostStatus::UPDATED);
-    }
-
-    public function scopePublished($query)
-    {
-        return $query->where('status', PostStatus::PUBLISHED);
-    }
-
     // Accessors
     public function getStatusLabelAttribute()
     {

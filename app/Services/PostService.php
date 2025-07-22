@@ -10,31 +10,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Http\Resources\PostResource;
     
 class PostService
 {
     public function store(array $validated): Post
     {
-        $request = request();
-
         DB::beginTransaction();
 
         try {
             $validated['user_id'] = Auth::id();
-
             $validated['status'] = PostStatus::NEW;
+            $validated['publish_date'] = now()->parse($validated['publish_date']);
 
-            $validated['publish_date'] = $request->filled('publish_date')
-                ? now()->parse($request->input('publish_date'))
-                : null;
-            
-            $validated['content'] = str_replace(['<p>', '</p>'], '', $request->input('content'));  
-                
             $post = Post::create($validated);
-
-            if ($request->hasFile('thumbnail')) {
-                $post->addMediaFromRequest('thumbnail')->toMediaCollection('thumbnail');
-            }
 
             DB::commit();
             return $post;
@@ -45,29 +34,22 @@ class PostService
         }
     }
 
+
     public function update(Post $post, array $validated): Post
     {
-        $request = request();
-
         DB::beginTransaction();
 
         try {
             $updateData = $validated;
 
-            $updateData['content'] = str_replace(['<p>', '</p>'], '', $request->input('content'));
-
-            $updateData['publish_date'] = $request->filled('publish_date')
-                ? now()->parse($request->input('publish_date'))
-                : null;
+            $updateData['content'] = request()->input('content');
+            $updateData['publish_date'] = request()->filled('publish_date')
+                ? now()->parse(request()->input('publish_date'))
+                : now();
 
             unset($updateData['status']);
 
             $post->update($updateData);
-
-            if ($request->hasFile('thumbnail')) {
-                $post->clearMediaCollection('thumbnail');
-                $post->addMediaFromRequest('thumbnail')->toMediaCollection('thumbnail');
-            }
 
             DB::commit();
             return $post;
@@ -78,50 +60,51 @@ class PostService
         }
     }
 
-    public function getDatatablePosts(Request $request): array
+
+    public function getDatatablePosts(array $filters): array
     {
         $query = Post::query()->where('user_id', Auth::id());
 
-        if ($search = $request->input('search.value')) {
+        // Tìm kiếm
+        if (!empty($filters['custom_search'])) {
+            $search = $filters['custom_search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                 ->orWhere('description', 'like', "%{$search}%");
             });
         }
+
+        // Lọc theo status
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $query->where('status', (int) $filters['status']);
+        }
+
         $total = $query->count();
 
-        $start = (int) $request->input('start', 0);
-        $length = (int) $request->input('length', 3);
+        $start = $filters['start'] ?? 0;
+        $length = $filters['length'] ?? 3;
 
-        $columns = ['id', 'thumbnail', 'title', 'description', 'publish_date', 'status']; 
-        $order = $request->input('order.0', ['column' => 0, 'dir' => 'desc']);
+        $columns = ['id', 'thumbnail', 'title', 'description', 'publish_date', 'status'];
+        $order = $filters['order'] ?? ['column' => 0, 'dir' => 'desc'];
         $columnIndex = (int) ($order['column'] ?? 0);
         $sortColumn = $columns[$columnIndex] ?? 'id';
         $sortDir = $order['dir'] === 'asc' ? 'asc' : 'desc';
 
-
         $posts = $query->orderBy($sortColumn, $sortDir)
             ->paginate($length, ['*'], 'page', intval($start / $length) + 1);
 
-        $data = $posts->map(function ($post, $index) use ($start) {
-            return [
-                'DT_RowIndex' => $start + $index + 1,
-                'thumbnail' => $post->thumbnail,
-                'title' => Str::limit($post->title, 50),
-                'description' => Str::limit($post->description, 80),
-                'publish_date' => $post->publish_date,
-                'status' => $post->status_badge,
-                'id' => $post->id
-            ];
-        })->toArray();
+        $posts->each(function ($post, $index) use ($start) {
+            $post->index = $index + 1;
+        });
 
         return [
-            'draw' => (int) $request->input('draw'),
+            'draw' => $filters['draw'] ?? 1,
             'recordsTotal' => Post::where('user_id', Auth::id())->count(),
             'recordsFiltered' => $total,
-            'data' => $data,
+            'data' => PostResource::collection($posts)->toArray(request()),
         ];
     }
+
 
     public function destroy(Post $post): void
     {

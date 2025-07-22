@@ -10,8 +10,5 @@
     <p>Bài viết với tiêu đề <strong>"{{ $post->title }}"</strong> của bạn đã được 
     <strong>{{ $post->status_badge }}</strong>.</p>
 
-    <p>Cảm ơn bạn đã sử dụng hệ thống của chúng tôi.</p>
-
-    <p>Trân trọng,<br>{{ config('app.name') }}</p>
 </body>
 </html>

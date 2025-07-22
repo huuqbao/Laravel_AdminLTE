@@ -25,7 +25,7 @@
 
     <div>
         <strong>Nội dung:</strong>
-        <div>{!! $post->content !!}</div>
+        <div>{{ $post->content }}</div>
     </div>
 
     <hr>
