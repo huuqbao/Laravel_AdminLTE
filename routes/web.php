@@ -9,6 +9,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 use App\Http\Middleware\CheckAccountStatus;
 
 
@@ -89,6 +91,11 @@ Route::prefix('admin')
 
 // 6. Đăng xuất 
 Route::middleware(['auth', 'check.account'])->post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// 7. Like + comment
+Route::post('/posts/{post}/like', [LikeController::class, 'likePost']);
+Route::post('/comments/{comment}/like', [LikeController::class, 'likeComment']);
+Route::post('/posts/{post}/comment', [CommentController::class, 'store']);
 
 
 

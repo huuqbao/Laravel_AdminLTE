@@ -51,4 +51,15 @@ class Post extends Model implements HasMedia
     {
         return sprintf('<span class="%s">%s</span>', $this->status_class, $this->status_label);
     }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
 }

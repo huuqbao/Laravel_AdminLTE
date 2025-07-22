@@ -67,4 +67,14 @@ class User extends Authenticatable
         return trim("{$this->last_name} {$this->first_name}") ?: $this->email;
     }
     
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    
 }
