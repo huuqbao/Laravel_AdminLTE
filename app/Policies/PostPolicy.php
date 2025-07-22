@@ -8,16 +8,6 @@ use App\Enums\RoleStatus;
 
 class PostPolicy
 {
-    // public function viewAny(User $user): bool
-    // {
-    //     return true;
-    // }
-
-    // public function view(User $user, Post $post): bool
-    // {
-    //     return true;
-    // }
-
     public function create(User $user): bool
     {
         return true;
@@ -32,14 +22,4 @@ class PostPolicy
     {
         return $user->role === RoleStatus::ADMIN || $user->id === $post->user_id;
     }
-
-    // public function restore(User $user, Post $post): bool
-    // {
-    //     return false;
-    // }
-
-    // public function forceDelete(User $user, Post $post): bool
-    // {
-    //     return false;
-    // }
 }
