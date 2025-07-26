@@ -9,23 +9,23 @@ class LikeService
 {
     public function toggleLike($likeable, Request $request): int
     {
-        $query = $likeable->likes();
+        if (!Auth::check()) {
+            abort(403, 'Bạn cần đăng nhập để thực hiện hành động này.');
+        }
 
-        $data = [
-            'ip_address' => $request->ip(),
-        ];
+        $userId = Auth::id();
 
-        if (Auth::check()) {
-            $data['user_id'] = Auth::id();
-            $exists = $query->where('user_id', $data['user_id'])->exists();
+        $existingLike = $likeable->likes()->where('user_id', $userId)->first();
+
+        if ($existingLike) {
+            $existingLike->delete(); // Bỏ like nếu đã like
         } else {
-            $exists = $query->where('ip_address', $data['ip_address'])->exists();
+            $likeable->likes()->create([
+                'user_id'    => $userId,
+                'ip_address' => $request->ip(), // log IP nếu cần
+            ]);
         }
 
-        if (!$exists) {
-            $likeable->likes()->create($data);
-        }
-
-        return $likeable->likes()->count();
+        return $likeable->likes()->count(); // Trả về tổng số lượt like hiện tại
     }
 }

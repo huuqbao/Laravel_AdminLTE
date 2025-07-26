@@ -93,9 +93,10 @@ Route::prefix('admin')
 Route::middleware(['auth', 'check.account'])->post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // 7. Like + comment
-Route::post('/posts/{post}/like', [LikeController::class, 'likePost']);
-Route::post('/comments/{comment}/like', [LikeController::class, 'likeComment']);
-Route::post('/posts/{post}/comment', [CommentController::class, 'store']);
+Route::post('/posts/{post}/like', [LikeController::class, 'likePost'])->name('posts.like');
+Route::post('/comments/{comment}/like', [LikeController::class, 'likeComment'])->name('comments.like');
+Route::post('/posts/{post}/comment', [CommentController::class, 'store'])->name('posts.comment');
+
 
 
 

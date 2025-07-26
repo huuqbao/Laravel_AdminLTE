@@ -13,6 +13,7 @@ class NewsService
     {
         return Post::where('status', PostStatus::PUBLISHED)
             ->where('publish_date', '<=', now())
+            ->withCount(['likes', 'comments'])
             ->orderByDesc('publish_date')
             ->paginate($perPage);
     }

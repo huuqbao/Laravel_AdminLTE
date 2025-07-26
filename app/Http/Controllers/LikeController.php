@@ -9,7 +9,7 @@ use App\Services\LikeService;
 
 class LikeController extends Controller
 {
-    protected $likeService;
+    protected LikeService $likeService;
 
     public function __construct(LikeService $likeService)
     {

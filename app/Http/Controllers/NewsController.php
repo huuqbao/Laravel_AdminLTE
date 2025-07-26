@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Services\NewsService;
+use Illuminate\Support\Facades\Auth;
 
 class NewsController extends Controller
 {
@@ -30,6 +31,13 @@ class NewsController extends Controller
     {
         abort_unless($this->newsService->isPostVisible($post), 404);
 
-        return view('news.show', compact('post'));
+        $post->loadCount('likes');
+
+        $userLiked = $post->likes()
+            ->when(Auth::check(), fn($q) => $q->where('user_id', Auth::id()))
+            ->when(!Auth::check(), fn($q) => $q->where('ip_address', request()->ip()))
+            ->exists();
+
+        return view('news.show', compact('post', 'userLiked'));
     }
 }

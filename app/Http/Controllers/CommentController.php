@@ -21,13 +21,14 @@ class CommentController extends Controller
         $comment = $this->commentService->createComment(
             $post,
             $request->input('body'),     
-            $request->ip()              
+            $request->ip(),
+            $request->input('parent_id'),     
         );
 
         return response()->json([
             'comment' => [
-                'user' => $comment->user->name ?? 'Khách',
-                'body' => $comment->body
+                'user' => $comment->user->name,
+                'body' => $comment->body,
             ]
         ]);
     }
