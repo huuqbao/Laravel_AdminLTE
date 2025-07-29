@@ -22,6 +22,13 @@ class CommentService
             $data['user_id'] = Auth::id();
         }
 
-        return Comment::create($data);
+        return Comment::create($data)->fresh([
+            'user',
+            'likes',
+            'replies.user',
+            'replies.likes',
+            'replies.replies.user',
+            'replies.replies.likes',
+        ]);
     }
 }

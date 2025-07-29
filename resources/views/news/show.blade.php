@@ -6,7 +6,6 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-9">
-
             {{-- Tiêu đề --}}
             <h1 class="fw-bold mb-3">{{ $post->title }}</h1>
 
@@ -68,12 +67,10 @@
 
             {{-- Danh sách bình luận --}}
             <div id="comments-list">
-                @foreach ($post->comments()->whereNull('parent_id')->latest()->get() as $comment)
+                @foreach ($comments as $comment)
                     @include('news.comment', ['comment' => $comment])
                 @endforeach
-
             </div>
-
         </div>
     </div>
 </div>
@@ -87,7 +84,7 @@
         let icon = btn.find('svg');
         let isLiked = btn.hasClass('btn-danger');
 
-        $.post("{{ url('/posts/' . $post->id . '/like') }}", {
+        $.post("{{ route('posts.like', ['post' => $post->id]) }}", {
             _token: '{{ csrf_token() }}'
         }, function (data) {
             $('#like-post-count').text(data.count);
@@ -108,26 +105,37 @@
         let form = $(this);
         let body = form.find('textarea[name="body"]');
         let errorDiv = $('#comment-error');
-        let parentId = $('#parent_id').val();
 
         $.ajax({
-            url: "{{ url('/posts/' . $post->id . '/comment') }}",
+            url: "{{ route('posts.comment', ['post' => $post->id]) }}",
             method: "POST",
             data: form.serialize(),
             success: function (res) {
-                location.reload(); // có thể cải thiện thành append cho mượt hơn
+                // Nếu là phản hồi
+                if (res.parent_id) {
+                    const parentCommentBox = $(`#comment-${res.parent_id}`);
+                    const repliesContainer = parentCommentBox.find('.replies');
+
+                    // Nếu chưa có div chứa replies thì tạo
+                    if (repliesContainer.length === 0) {
+                        parentCommentBox.append('<div class="replies ms-3 ps-3 mt-2"></div>');
+                    }
+
+                    parentCommentBox.find('.replies').first().append(res.html);
+                } else {
+                    // Là comment chính
+                    $('#comments-list').prepend(res.html);
+                }
+
+                // Reset form
+                $('#comment-form')[0].reset();
                 $('#parent_id').val('');
                 $('#replying-to').addClass('d-none');
                 $('textarea[name="body"]').attr('placeholder', 'Nhập bình luận...');
-            },
-            error: function (xhr) {
-                if (xhr.responseJSON?.errors?.body) {
-                    errorDiv.text(xhr.responseJSON.errors.body[0]).removeClass('d-none');
-                    body.addClass('is-invalid');
-                } else {
-                    alert('Đã xảy ra lỗi.');
-                }
+                $('#comment-error').addClass('d-none');
+                $('textarea[name="body"]').removeClass('is-invalid');
             }
+
         });
     });
 
@@ -138,7 +146,11 @@
         let icon = btn.find('svg');
         let isLiked = btn.hasClass('btn-danger');
 
-        $.post(`/comments/${id}/like`, {
+        // Tạo URL từ template Blade rồi thay thế comment ID
+        let urlTemplate = "{{ route('comments.like', ['comment' => '__comment_id__']) }}";
+        let url = urlTemplate.replace('__comment_id__', id);
+
+        $.post(url, {
             _token: '{{ csrf_token() }}'
         }, function (data) {
             $(`#like-count-${id}`).text(data.count);
@@ -173,3 +185,4 @@
     });
 </script>
 @endpush
+

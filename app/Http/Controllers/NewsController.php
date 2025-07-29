@@ -33,11 +33,29 @@ class NewsController extends Controller
 
         $post->loadCount('likes');
 
+        // Nạp toàn bộ quan hệ bình luận nhiều cấp
+        $post->load([
+            'comments' => function ($q) {
+                $q->whereNull('parent_id')->latest();
+            },
+            'comments.user',
+            'comments.likes',
+            'comments.replies.user',
+            'comments.replies.likes',
+            'comments.replies.replies.user',
+            'comments.replies.replies.likes',
+        ]);
+
         $userLiked = $post->likes()
             ->when(Auth::check(), fn($q) => $q->where('user_id', Auth::id()))
             ->when(!Auth::check(), fn($q) => $q->where('ip_address', request()->ip()))
             ->exists();
 
-        return view('news.show', compact('post', 'userLiked'));
+        return view('news.show', [
+            'post' => $post,
+            'userLiked' => $userLiked,
+            'comments' => $post->comments, 
+        ]);
     }
+
 }

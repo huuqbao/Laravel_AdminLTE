@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     protected $fillable = [
-        'user_id', 'body', 'commentable_id', 'commentable_type', 'ip_address'
-    ]; 
+        'user_id', 'body', 'commentable_id', 'commentable_type', 'ip_address', 'parent_id'
+    ];
+ 
 
     public function commentable()
     {
@@ -32,8 +33,9 @@ class Comment extends Model
 
     public function replies()
     {
-        return $this->hasMany(Comment::class, 'parent_id')->latest();
+        return $this->hasMany(Comment::class, 'parent_id')->with('replies', 'user', 'likes');
     }
+
 }
 
 
