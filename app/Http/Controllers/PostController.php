@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Resources\PostResource;
 
 
 class PostController extends Controller
@@ -62,9 +63,12 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
-        $post->load('user'); 
-        return view('posts.edit', compact('post'));
+        $post->load('user');
+        $postData = (new PostResource($post))->toArray(request());
+
+        return view('posts.edit', compact('post', 'postData'));
     }
+
 
     public function update(UpdatePostRequest $request, Post $post)
     {

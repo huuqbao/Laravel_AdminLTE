@@ -52,7 +52,7 @@
                         type="datetime-local"
                         name="publish_date"
                         class="form-control"
-                        value="{{ old('publish_date', \App\Helpers\DateHelper::formatForDateTimeLocal($post->publish_date)) }}"
+                        value="{{ old('publish_date', $post['publish_date']) }}"
                     >
                     @error('publish_date')
                         <div class="text-danger">{{ $message }}</div>

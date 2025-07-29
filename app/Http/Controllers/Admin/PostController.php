@@ -10,6 +10,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Services\Admin\PostService;
 use Illuminate\Validation\Rule;
+use App\Http\Resources\PostResource;
 
 class PostController extends Controller
 {
@@ -35,7 +36,12 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
-        return view('admin.posts.edit', compact('post'));
+        $postResource = (new PostResource($post))->toArray(request());
+
+        return view('admin.posts.edit', [
+            'post' => $post,                
+            'postData' => $postResource    
+        ]);
     }
 
     public function update(UpdatePostRequest $request, Post $post)

@@ -46,7 +46,12 @@
                 {{-- Ngày đăng --}}
                 <div class="mb-3">
                     <label for="publish_date">Ngày đăng</label>
-                    <input type="datetime-local" name="publish_date" class="form-control" value="{{ old('publish_date') }}">
+                    <input
+                        type="datetime-local"
+                        name="publish_date"
+                        class="form-control"
+                        value="{{ old('publish_date') ? format_datetime_local(old('publish_date')) : '' }}"
+                    >
                     @error('publish_date')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror

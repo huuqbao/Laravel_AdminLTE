@@ -1,12 +1,9 @@
 <?php
 
-namespace App\Helpers;
-
 use Carbon\Carbon;
 
-class DateHelper
-{
-    public static function formatForDateTimeLocal(?string $datetime): ?string
+if (!function_exists('format_datetime_local')) {
+    function format_datetime_local(?string $datetime): ?string
     {
         if (!$datetime) return null;
 
